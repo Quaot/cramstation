@@ -89,5 +89,10 @@ root = Downloads\Math 117
 left = notes
 right = pick "6 Exams" "2 Practice" "%USERPROFILE%\Downloads\Exam Bank\Math 117"
 
+[Math 117: Lecture]
+notes folder = Notebook
+left = notes
+right = pick "1 Lectures\PDF"
+
 [Math 117: Reading]
 full = pick "."
