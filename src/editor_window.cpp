@@ -166,6 +166,7 @@ void show_editor( HWND owner ) {
     window_class.hCursor = LoadCursorW( nullptr, IDC_ARROW );
     window_class.hbrBackground = reinterpret_cast<HBRUSH>( COLOR_BTNFACE + 1 );
     window_class.lpszClassName = L"CramstationEditor";
+    window_class.hIcon = LoadIconW( window_class.hInstance, MAKEINTRESOURCEW( 1 ) );
     RegisterClassExW( &window_class );
 
     RECT place = centred_on_screen( scaled( 900, editor.dpi ), scaled( 640, editor.dpi ) );
