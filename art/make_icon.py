@@ -1,71 +1,90 @@
-"""Draws cramstation.ico: notes on the left, a highlighted page on the right."""
+"""Draws cramstation.ico: two sheets side by side, engraved in ink on red, to sit next to PdfCraft."""
 
 from pathlib import Path
 
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw
 
 BIG = 1024
 SIZES = [16, 20, 24, 32, 40, 48, 64, 128, 256]
 
-BACKGROUND_TOP = (77, 141, 255)
-BACKGROUND_BOTTOM = (88, 64, 214)
-HIGHLIGHT_TOP = (255, 214, 92)
-HIGHLIGHT_BOTTOM = (255, 160, 46)
-INK = (70, 82, 160)
-FAINT = (196, 204, 228)
+RED = (183, 2, 40)
+CREAM = (239, 233, 220)
+INK = (11, 11, 12)
+GREY_INK = (125, 122, 116)
+
+LEFT_SHEET = (170, 196, 498, 830)
+RIGHT_SHEET = (526, 196, 854, 830)
+FOLD = 92   # size of the turned-down corner on the right sheet
 
 
-def gradient(box_size, top, bottom):
-    """A top-left to bottom-right blend between two colours."""
-    down = Image.linear_gradient("L").resize( box_size )
-    across = down.rotate( 90 ).transpose( Image.FLIP_LEFT_RIGHT )
-    mask = ImageChops.add( down, across, scale=2 )
-    return Image.composite( Image.new( "RGBA", box_size, bottom ), Image.new( "RGBA", box_size, top ), mask )
+def blank():
+    return Image.new("L", (BIG, BIG), 0)
 
 
-def shape(box, radius):
-    mask = Image.new("L", (BIG, BIG), 0)
-    ImageDraw.Draw(mask).rounded_rectangle(box, radius=radius, fill=255)
+def hatch(clip, spacing, width, slope=1):
+    """Parallel diagonal lines inside clip, like the shading on an engraving."""
+    lines = blank()
+    pen = ImageDraw.Draw(lines)
+    for start in range(-BIG, 2 * BIG, spacing):
+        pen.line((start, 0, start + slope * BIG, BIG), fill=255, width=width)
+    return ImageChops.multiply(lines, clip)
+
+
+def ink(image, mask, colour=INK):
+    image.paste(Image.new("RGBA", (BIG, BIG), colour), (0, 0), mask)
+
+
+def sheet_outline(box, folded):
+    """The outline of a sheet, with the top-right corner turned down when folded."""
+    left, top, right, bottom = box
+    if not folded:
+        return [(left, top), (right, top), (right, bottom), (left, bottom)]
+    return [(left, top), (right - FOLD, top), (right, top + FOLD), (right, bottom), (left, bottom)]
+
+
+def polygon_mask(points, offset=(0, 0)):
+    mask = blank()
+    ImageDraw.Draw(mask).polygon([(x + offset[0], y + offset[1]) for x, y in points], fill=255)
     return mask
-
-
-def paint(image, mask, fill):
-    layer = fill if isinstance(fill, Image.Image) else Image.new("RGBA", (BIG, BIG), fill)
-    image.paste(layer, (0, 0), mask)
-
-
-def shadow(image, mask, offset, blur, strength):
-    soft = mask.filter(ImageFilter.GaussianBlur(blur)).point(lambda value: int(value * strength))
-    moved = Image.new("L", (BIG, BIG), 0)
-    moved.paste(soft, offset)
-    image.paste(Image.new("RGBA", (BIG, BIG), (20, 18, 70)), (0, 0), moved)
 
 
 def draw(detailed):
     image = Image.new("RGBA", (BIG, BIG), (0, 0, 0, 0))
+    tile = blank()
+    ImageDraw.Draw(tile).rounded_rectangle((28, 28, 996, 996), radius=150, fill=255)
+    ink(image, tile, RED)
 
-    tile = shape((40, 40, 984, 984), 220)
-    paint(image, tile, gradient((BIG, BIG), BACKGROUND_TOP, BACKGROUND_BOTTOM))
-
-    # Soft light across the top of the tile
-    sheen = Image.linear_gradient("L").resize((BIG, BIG)).point(lambda value: int(max(0, 150 - value) * 0.35))
-    image.paste(Image.new("RGBA", (BIG, BIG), (255, 255, 255)), (0, 0), ImageChops.multiply(sheen, tile))
-
-    left = shape((160, 190, 498, 834), 56)
-    right = shape((526, 190, 864, 834), 56)
-    for pane in (left, right):
-        shadow(image, pane, (0, 26), 34, 0.45)
-    paint(image, left, (255, 255, 255))
-    paint(image, right, (255, 255, 255))
+    sheets = [sheet_outline(LEFT_SHEET, False), sheet_outline(RIGHT_SHEET, True)]
 
     if detailed:
-        for y, width in ((300, 200), (400, 200), (500, 200), (600, 120)):
-            paint(image, shape((226, y, 226 + width, y + 40), 20), INK)
-        paint(image, shape((588, 288, 802, 368), 22), gradient((BIG, BIG), HIGHLIGHT_TOP, HIGHLIGHT_BOTTOM))
-        for y in (430, 520, 610):
-            paint(image, shape((592, y, 798, y + 36), 18), FAINT)
-    else:
-        paint(image, shape((566, 250, 824, 420), 40), gradient((BIG, BIG), HIGHLIGHT_TOP, HIGHLIGHT_BOTTOM))
+        for points in sheets:
+            ink(image, hatch(polygon_mask(points, (26, 30)), 22, 7))
+
+    for points in sheets:
+        ink(image, polygon_mask(points), CREAM)
+        ImageDraw.Draw(image).line(points + [points[0]], fill=INK, width=18 if detailed else 34, joint="curve")
+
+    # The turned-down corner, shaded with cross-hatching
+    right, top = RIGHT_SHEET[2], RIGHT_SHEET[1]
+    flap = [(right - FOLD, top), (right - FOLD, top + FOLD), (right, top + FOLD)]
+    if detailed:
+        flap_mask = polygon_mask(flap)
+        ink(image, ImageChops.lighter(hatch(flap_mask, 18, 5), hatch(flap_mask, 18, 5, slope=-1)))
+    ImageDraw.Draw(image).line(flap + [flap[0]], fill=INK, width=18 if detailed else 34, joint="curve")
+
+    if not detailed:
+        return image
+
+    pen = ImageDraw.Draw(image)
+    for y, length in ((300, 230), (380, 230), (460, 230), (540, 230), (620, 150)):
+        pen.line((228, y, 228 + length, y), fill=INK, width=20)
+        pen.ellipse((222, y - 10, 238, y + 10), fill=INK)
+
+    band = blank()
+    ImageDraw.Draw(band).rectangle((572, 330, 808, 404), fill=255)
+    ink(image, hatch(band, 14, 6))
+    for y, length in ((470, 236), (540, 236), (610, 236), (680, 160)):
+        pen.line((572, y, 572 + length, y), fill=GREY_INK, width=14)
 
     return image
 
