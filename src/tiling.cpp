@@ -13,6 +13,7 @@ const wchar_t *pdfcraft_exe = L"C:\\Program Files\\PdfCraft\\pdfcraft.exe";
 struct live_window {
     planned_window plan;
     RECT target{};
+    int rows = 1;               // windows sharing this side
     DWORD process_id = 0;
     HWND hwnd = nullptr;
 };
@@ -81,10 +82,62 @@ RECT visible_frame( HWND hwnd ) {
     return frame;
 }
 
-bool is_in_place( HWND hwnd, const RECT &target ) {
+bool is_in_place( HWND hwnd, const RECT &target, int tolerance = 2 ) {
     RECT frame = visible_frame( hwnd );
-    return std::abs( frame.left - target.left ) <= 2 && std::abs( frame.top - target.top ) <= 2 &&
-           std::abs( frame.right - target.right ) <= 2 && std::abs( frame.bottom - target.bottom ) <= 2;
+    return std::abs( frame.left - target.left ) <= tolerance && std::abs( frame.top - target.top ) <= tolerance &&
+           std::abs( frame.right - target.right ) <= tolerance && std::abs( frame.bottom - target.bottom ) <= tolerance;
+}
+
+void press_keys( std::initializer_list<WORD> keys ) {
+    vector<INPUT> inputs;
+    for ( WORD key : keys ) {
+        INPUT down{ INPUT_KEYBOARD };
+        down.ki.wVk = key;
+        inputs.push_back( down );
+    }
+    for ( auto key = keys.end(); key != keys.begin(); ) {
+        INPUT up{ INPUT_KEYBOARD };
+        up.ki.wVk = *--key;
+        up.ki.dwFlags = KEYEVENTF_KEYUP;
+        inputs.push_back( up );
+    }
+    SendInput( static_cast<UINT>( inputs.size() ), inputs.data(), sizeof( INPUT ) );
+    Sleep( 250 );
+}
+
+// Windows only lets the program that sent the last key press change which window is in front.
+// F24 is on no keyboard, so pressing it changes nothing else.
+bool bring_to_front( HWND hwnd ) {
+    press_keys( { VK_F24 } );
+    SetForegroundWindow( hwnd );
+    Sleep( 100 );
+    return GetForegroundWindow() == hwnd;
+}
+
+// Snapping animates, so wait until the frame has stopped changing.
+void wait_until_still( HWND hwnd ) {
+    RECT last = visible_frame( hwnd );
+    int still_checks = 0;
+    for ( int i = 0; i < 30 && still_checks < 3; ++i ) {
+        Sleep( 50 );
+        RECT now = visible_frame( hwnd );
+        still_checks = EqualRect( &now, &last ) ? still_checks + 1 : 0;
+        last = now;
+    }
+}
+
+// Snaps a window that has a side to itself, using the keys a person would press,
+// so Windows treats it as snapped. Stacked windows are only moved into place.
+void snap( const live_window &window ) {
+    if ( window.rows != 1 ) return;
+    if ( window.plan.side == L"full" ) {
+        ShowWindow( window.hwnd, SW_MAXIMIZE );
+        return;
+    }
+    if ( !bring_to_front( window.hwnd ) ) return;
+    ShowWindow( window.hwnd, SW_RESTORE );   // Win+Left on a window that is already snapped moves it on
+    Sleep( 150 );
+    press_keys( { VK_LWIN, static_cast<WORD>( window.plan.side == L"left" ? VK_LEFT : VK_RIGHT ) } );
 }
 
 void move_window( HWND hwnd, const RECT &target ) {
@@ -127,6 +180,7 @@ vector<wstring> open_windows( const vector<planned_window> &plan ) {
             int top = area.top + static_cast<int>( row ) * row_height;
             int bottom = ( row + 1 == on_side.size() ) ? area.bottom : top + row_height;
             on_side[row]->target = { area.left, top, area.right, bottom };
+            on_side[row]->rows = static_cast<int>( on_side.size() );
         }
     }
 
@@ -164,12 +218,26 @@ vector<wstring> open_windows( const vector<planned_window> &plan ) {
         Sleep( 100 );
     }
 
+    // Snap the left side first, so the right side fills the space next to it.
+    // A window that did not snap into place is put there directly instead.
+    for ( const wchar_t *side : { L"left", L"right", L"full" } ) {
+        for ( live_window &window : windows ) {
+            if ( window.plan.side != side || !window.hwnd ) continue;
+            snap( window );
+            wait_until_still( window.hwnd );
+            if ( !is_in_place( window.hwnd, window.target, 8 ) ) {
+                ShowWindow( window.hwnd, SW_RESTORE );
+                move_window( window.hwnd, window.target );
+            }
+        }
+    }
+
     vector<wstring> problems;
     for ( const live_window &window : windows ) {
         if ( !window.hwnd ) problems.push_back( L"No window appeared for " + file_name( window.plan.paths[0] ) );
     }
     for ( const live_window &window : windows ) {
-        if ( window.hwnd && window.plan.app == program::notepad ) SetForegroundWindow( window.hwnd );
+        if ( window.hwnd && window.plan.app == program::notepad ) bring_to_front( window.hwnd );
     }
     return problems;
 }

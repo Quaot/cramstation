@@ -39,7 +39,7 @@ right = pdf "4 Labs\Lab 5.pdf"
 right = folder "4 Labs"
 ```
 
-A side is `left` or `right`, or `full` for the whole screen. When several windows share a side they are stacked from top to bottom in the order written.
+A side is `left` or `right`, or `full` for the whole screen. When several windows share a side they are stacked from top to bottom in the order written. A window with a side to itself is snapped the way Win+Left snaps it, so dragging the line between two snapped windows resizes both.
 
 | Line | Opens |
 |---|---|
