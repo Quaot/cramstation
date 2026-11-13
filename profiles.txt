@@ -40,6 +40,9 @@ root = Downloads\ECE 150
 left = notes
 right = pick "6 Exams" "2 Practice" "%USERPROFILE%\Downloads\Exam Bank\ECE 150"
 
+[ECE 150: Lecture]
+full = pick "1 Lectures\PDFs"
+
 [ECE 150: Reading]
 full = pick "."
 
