@@ -6,6 +6,23 @@
 #include <cstdlib>
 #include <set>
 
+void press_keys( std::initializer_list<unsigned short> keys ) {
+    vector<INPUT> inputs;
+    for ( WORD key : keys ) {
+        INPUT down{ INPUT_KEYBOARD };
+        down.ki.wVk = key;
+        inputs.push_back( down );
+    }
+    for ( auto key = keys.end(); key != keys.begin(); ) {
+        INPUT up{ INPUT_KEYBOARD };
+        up.ki.wVk = *--key;
+        up.ki.dwFlags = KEYEVENTF_KEYUP;
+        inputs.push_back( up );
+    }
+    SendInput( static_cast<UINT>( inputs.size() ), inputs.data(), sizeof( INPUT ) );
+    Sleep( 250 );
+}
+
 namespace {
 
 const wchar_t *pdfcraft_exe = L"C:\\Program Files\\PdfCraft\\pdfcraft.exe";
@@ -88,22 +105,6 @@ bool is_in_place( HWND hwnd, const RECT &target, int tolerance = 2 ) {
            std::abs( frame.right - target.right ) <= tolerance && std::abs( frame.bottom - target.bottom ) <= tolerance;
 }
 
-void press_keys( std::initializer_list<WORD> keys ) {
-    vector<INPUT> inputs;
-    for ( WORD key : keys ) {
-        INPUT down{ INPUT_KEYBOARD };
-        down.ki.wVk = key;
-        inputs.push_back( down );
-    }
-    for ( auto key = keys.end(); key != keys.begin(); ) {
-        INPUT up{ INPUT_KEYBOARD };
-        up.ki.wVk = *--key;
-        up.ki.dwFlags = KEYEVENTF_KEYUP;
-        inputs.push_back( up );
-    }
-    SendInput( static_cast<UINT>( inputs.size() ), inputs.data(), sizeof( INPUT ) );
-    Sleep( 250 );
-}
 
 // Windows only lets the program that sent the last key press change which window is in front.
 // F24 is on no keyboard, so pressing it changes nothing else.

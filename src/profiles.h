@@ -14,6 +14,7 @@ struct setup {
     wstring title;          // "ECE 150: Exam", or just "ECE 198"
     wstring root;
     wstring notes_folder;
+    wstring desktop;        // virtual desktop to open on; empty means the one showing
     vector<layout_item> items;
 };
 

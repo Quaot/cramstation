@@ -14,6 +14,7 @@ struct block {
     wstring name;
     wstring root;
     wstring notes_folder;
+    wstring desktop;
     vector<written_item> items;
     vector<block> setups;
 };
@@ -67,6 +68,8 @@ setup build_setup( const wstring &title, const block &profile, const block *own 
     if ( !notes_folder.empty() ) result.notes_folder = resolve( result.root, notes_folder );
     else if ( is_folder( join_path( result.root, L"2 Practice" ) ) ) result.notes_folder = join_path( result.root, L"2 Practice" );
     else result.notes_folder = result.root;
+
+    result.desktop = ( own && !own->desktop.empty() ) ? own->desktop : profile.desktop;
 
     vector<written_item> items = profile.items;
     if ( own ) items.insert( items.end(), own->items.begin(), own->items.end() );
@@ -135,9 +138,10 @@ profile_file read_profiles( const wstring &text ) {
 
         if ( key == L"root" ) { current->root = read_paths( value ).empty() ? L"" : read_paths( value )[0]; continue; }
         if ( key == L"notes folder" ) { current->notes_folder = read_paths( value ).empty() ? L"" : read_paths( value )[0]; continue; }
+        if ( key == L"desktop" ) { current->desktop = read_paths( value ).empty() ? L"" : read_paths( value )[0]; continue; }
 
         if ( key != L"left" && key != L"right" && key != L"full" ) {
-            result.errors.push_back( where + L"unknown setting '" + key + L"' (use root, notes folder, left, right or full)" );
+            result.errors.push_back( where + L"unknown setting '" + key + L"' (use root, notes folder, desktop, left, right or full)" );
             continue;
         }
 

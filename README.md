@@ -52,6 +52,8 @@ A side is `left` or `right`, or `full` for the whole screen. When several window
 
 Paths start from the root unless they are absolute. `*` matches any text in a file name, and variables such as `%USERPROFILE%` are expanded. Answer files go in `2 Practice` when the course has one. Set `notes folder = ...` to change that.
 
+`desktop = 150` switches to the virtual desktop named 150 before anything opens, so each subject can keep its own desktop. Cramstation presses Ctrl+Win+Left or Right as many times as it takes and reads the desktop names from the registry.
+
 A setup starts with every line of its profile, so lines shared by all setups can go under the profile heading.
 
 ## Build

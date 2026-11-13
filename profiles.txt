@@ -7,6 +7,7 @@
 # Settings
 #   root = Downloads\ECE 150     the folder other paths start from (inside your user folder)
 #   notes folder = 2 Practice    where "notes" keeps answer files (default "2 Practice", else root)
+#   desktop = 150                switch to the virtual desktop with this name first
 #
 # Windows are written as  side = what
 #   side is left or right, or full for the whole screen.
@@ -35,6 +36,7 @@ full = pick "."
 
 [ECE 150]
 root = Downloads\ECE 150
+desktop = 150
 
 [ECE 150: Exam]
 left = notes
@@ -65,6 +67,7 @@ full = pick "."
 
 [ENGL 192]
 root = Downloads\ENGL 192
+desktop = 192
 
 [ENGL 192: Worksheet]
 left = notes
