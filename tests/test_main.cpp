@@ -11,6 +11,7 @@
 
 #include <cstdio>
 
+#include "check.h"
 #include "../src/canvas.h"
 #include "../src/files.h"
 #include "../src/notes_tabs.h"
@@ -18,13 +19,6 @@
 #include "../src/ui.h"
 
 namespace {
-
-int failures = 0;
-
-void check( bool passed, const char *what ) {
-    std::printf( "%s  %s\n", passed ? "pass" : "FAIL", what );
-    if ( !passed ) ++failures;
-}
 
 const wstring course = expand_variables( L"%USERPROFILE%\\Downloads\\ECE 190" );
 
@@ -223,6 +217,6 @@ int wmain( int argument_count, wchar_t **arguments ) {
     check_notes_tabs();
     if ( argument_count > 1 ) save_picture( canvas, arguments[1] );
 
-    std::printf( "%s\n", failures ? "Some checks failed." : "All checks passed." );
-    return failures ? 1 : 0;
+    std::printf( "%s\n", check_failures() ? "Some checks failed." : "All checks passed." );
+    return check_failures() ? 1 : 0;
 }
