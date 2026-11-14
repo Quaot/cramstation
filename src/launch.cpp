@@ -33,14 +33,30 @@ vector<wstring> open_setup( const setup &chosen, const vector<vector<wstring>> &
         case item_kind::pick:
             if ( i < picks.size() ) pdfs = picks[i];
             break;
+        case item_kind::newest: {
+            vector<pdf_file> matches = find_pdfs( item.paths, true );
+            if ( matches.empty() ) {
+                problems.push_back( L"No PDF fits " + file_name( item.paths[0] ) );
+                break;
+            }
+            pdfs = { matches[0].path };
+            if ( date_text( matches[0].modified ) != today_text() ) {
+                problems.push_back( L"The newest " + file_name( item.paths[0] ) + L" is " + matches[0].name +
+                                    L", from " + date_text( matches[0].modified ) + L". Today's may not be downloaded yet." );
+            }
+            break;
+        }
         }
         if ( pdfs.empty() ) continue;
         if ( first_pdf.empty() ) first_pdf = pdfs[0];
 
-        if ( item.kind == item_kind::pick && separate ) {
-            for ( const wstring &pdf : pdfs ) plan.push_back( { item.side, program::pdfcraft, { pdf } } );
+        // Acrobat gets a window per PDF. PdfCraft shows several as tabs unless asked to separate them.
+        bool one_window_each = item.app == viewer::acrobat || ( item.kind == item_kind::pick && separate );
+        program app = item.app == viewer::acrobat ? program::acrobat : program::pdfcraft;
+        if ( one_window_each ) {
+            for ( const wstring &pdf : pdfs ) plan.push_back( { item.side, app, { pdf } } );
         } else {
-            plan.push_back( { item.side, program::pdfcraft, pdfs } );
+            plan.push_back( { item.side, app, pdfs } );
         }
     }
 

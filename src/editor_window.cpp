@@ -50,8 +50,8 @@ void save() {
         return;
     }
     SendMessageW( editor.text_box, EM_SETMODIFY, FALSE, 0 );
-    profile_file checked = read_profiles( text );
-    wstring message = L"Saved. " + std::to_wstring( checked.setups.size() ) + L" setups.";
+    profile_book checked = read_book( text );
+    wstring message = L"Saved. " + std::to_wstring( all_setups( checked ).size() ) + L" setups.";
     if ( !checked.errors.empty() ) {
         message += L" " + std::to_wstring( checked.errors.size() ) + L" problem(s), first: " + checked.errors[0];
     }

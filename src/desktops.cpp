@@ -60,11 +60,23 @@ int index_of( const vector<wstring> &ids, const wstring &id ) {
 
 }  // namespace
 
+// A desktop nobody renamed is shown as "Desktop 2" and so on, so it gets that name here too
+vector<wstring> desktop_names() {
+    vector<wstring> names;
+    vector<wstring> ids = desktop_ids();
+    for ( size_t i = 0; i < ids.size(); ++i ) {
+        wstring name = desktop_name( ids[i] );
+        names.push_back( name.empty() ? L"Desktop " + std::to_wstring( i + 1 ) : name );
+    }
+    return names;
+}
+
 wstring switch_to_desktop( const wstring &name ) {
     vector<wstring> ids = desktop_ids();
+    vector<wstring> names = desktop_names();
     int target = -1;
-    for ( size_t i = 0; i < ids.size(); ++i ) {
-        if ( lower( desktop_name( ids[i] ) ) == lower( name ) ) target = static_cast<int>( i );
+    for ( size_t i = 0; i < names.size(); ++i ) {
+        if ( lower( names[i] ) == lower( name ) ) target = static_cast<int>( i );
     }
     if ( target < 0 ) return L"There is no desktop named '" + name + L"', so the windows opened on this one.";
 

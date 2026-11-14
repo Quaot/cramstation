@@ -23,9 +23,20 @@ void press_keys( std::initializer_list<unsigned short> keys ) {
     Sleep( 250 );
 }
 
+const wchar_t *program_file( program app ) {
+    switch ( app ) {
+    case program::pdfcraft: return L"C:\\Program Files\\PdfCraft\\pdfcraft.exe";
+    case program::acrobat: return L"C:\\Program Files\\Adobe\\Acrobat DC\\Acrobat\\Acrobat.exe";
+    case program::notepad: return L"C:\\Windows\\System32\\notepad.exe";
+    case program::explorer: return L"C:\\Windows\\explorer.exe";
+    }
+    return L"";
+}
+
 namespace {
 
-const wchar_t *pdfcraft_exe = L"C:\\Program Files\\PdfCraft\\pdfcraft.exe";
+const wchar_t *pdfcraft_exe = program_file( program::pdfcraft );
+const wchar_t *acrobat_exe = program_file( program::acrobat );
 
 struct live_window {
     planned_window plan;
@@ -80,9 +91,10 @@ HWND find_window( const live_window &window, const std::set<HWND> &taken ) {
             DWORD process_id = 0;
             GetWindowThreadProcessId( hwnd, &process_id );
             if ( process_id == window.process_id ) return hwnd;
-        } else if ( window.plan.app == program::notepad ) {
+        } else if ( window.plan.app == program::notepad || window.plan.app == program::acrobat ) {
+            const wchar_t *app_name = window.plan.app == program::notepad ? L"Notepad" : L"Adobe Acrobat";
             wstring title = title_of( hwnd );
-            if ( contains_ci( title, file_name( window.plan.paths[0] ) ) && contains_ci( title, L"Notepad" ) ) return hwnd;
+            if ( contains_ci( title, file_name( window.plan.paths[0] ) ) && contains_ci( title, app_name ) ) return hwnd;
         } else if ( is_explorer( hwnd ) && contains_ci( title_of( hwnd ), file_name( window.plan.paths[0] ) ) ) {
             return hwnd;
         }
@@ -190,6 +202,8 @@ vector<wstring> open_windows( const vector<planned_window> &plan ) {
             wstring command = quoted( pdfcraft_exe ) + L" --new-window";
             for ( const wstring &path : window.plan.paths ) command += L" " + quoted( path );
             window.process_id = start_process( command );
+        } else if ( window.plan.app == program::acrobat ) {
+            start_process( quoted( acrobat_exe ) + L" /n " + quoted( window.plan.paths[0] ) );   // /n: a new window
         } else if ( window.plan.app == program::notepad ) {
             start_process( L"notepad.exe " + quoted( window.plan.paths[0] ) );
         } else {

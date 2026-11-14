@@ -2,7 +2,10 @@
 
 #include "text.h"
 
-enum class program { pdfcraft, notepad, explorer };
+enum class program { pdfcraft, acrobat, notepad, explorer };
+
+// Where each program's .exe is, for starting it and for its icon
+const wchar_t *program_file( program app );
 
 struct planned_window {
     wstring side;           // left, right or full

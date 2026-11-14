@@ -5,3 +5,6 @@
 // Switches to the virtual desktop with this name, as Ctrl+Win+Left/Right would.
 // Returns an empty string on success, or what went wrong.
 wstring switch_to_desktop( const wstring &name );
+
+// Names of the virtual desktops, in the order Task View shows them.
+vector<wstring> desktop_names();

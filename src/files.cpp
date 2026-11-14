@@ -58,6 +58,16 @@ bool is_answer_key( const wstring &name ) {
     return std::regex_search( name, key_names );
 }
 
+// One or two digits are a week or lecture number; longer runs such as course codes stay as they are.
+wstring newest_pattern( const wstring &path ) {
+    static const std::wregex short_number( L"(^|\\D)\\d{1,2}(?=\\D|$)" );
+    wstring name = file_name( path );
+    wstring pattern = std::regex_replace( name, short_number, L"$1*" );
+    if ( pattern == name ) return L"";
+    wstring folder = parent_folder( path );
+    return folder.empty() ? pattern : join_path( folder, pattern );
+}
+
 static wstring newest_matching( const wstring &pattern ) {
     WIN32_FIND_DATAW data;
     HANDLE handle = FindFirstFileW( pattern.c_str(), &data );
