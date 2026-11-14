@@ -1,6 +1,7 @@
 #include "launch.h"
 
 #include "desktops.h"
+#include "notes_tabs.h"
 #include "tiling.h"
 
 vector<wstring> open_setup( const setup &chosen, const vector<vector<wstring>> &picks, bool separate ) {
@@ -66,9 +67,15 @@ vector<wstring> open_setup( const setup &chosen, const vector<vector<wstring>> &
     }
 
     // A notes file is named after the first PDF, which is only known now
+    vector<wstring> notes_paths;
     for ( const auto &[plan_index, notes_item] : notes_windows ) {
         plan[plan_index].paths = { notes_file( chosen, *notes_item, first_pdf ) };
+        notes_paths.push_back( plan[plan_index].paths[0] );
     }
+
+    // Save and close the notes tabs from earlier setups, so Notepad does not fill up with them
+    close_old_notes( notes_paths );
+    for ( const wstring &path : notes_paths ) remember_notes( path );
 
     if ( !chosen.desktop.empty() ) {
         wstring problem = switch_to_desktop( chosen.desktop );
