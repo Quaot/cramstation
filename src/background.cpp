@@ -64,9 +64,11 @@ crammy_settings current_settings() {
 }
 
 void flip_start_at_sign_in() {
-    crammy_settings settings = current_settings();
+    vector<wstring> errors;
+    crammy_settings settings = read_settings( read_text_file( settings_path() ), errors );
     settings.start_at_sign_in = !shortcut_exists();
-    write_text_file( settings_path(), write_settings( settings ) );
+    // Rewriting a file with mistakes in it would replace the lines that could not be read.
+    if ( errors.empty() ) write_text_file( settings_path(), write_settings( settings ) );
     set_start_at_sign_in( settings.start_at_sign_in );
 }
 

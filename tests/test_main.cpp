@@ -228,16 +228,21 @@ void save_panel_picture( const wchar_t *path ) {
     vector<desktop_tile> tiles = {
         { L"Main", false, { pdfcraft, notepad } },
         { L"150", true, { pdfcraft } },
+        { L"115", false, {} },
         { L"192", false, {} },
         { L"Bakfiets", false, { explorer } },
+        { L"117", false, {} },
+        { L"105", false, {} },
+        { L"190", false, {} },
+        { L"198", false, {} },
     };
 
-    int width = scaled( 420, dpi ), height = panel_height( today, tiles, dpi );
+    int width = scaled( 300, dpi ), height = panel_height( today, tiles, dpi );
     HDC screen = GetDC( nullptr );
     HDC dc = CreateCompatibleDC( screen );
     HBITMAP bitmap = CreateCompatibleBitmap( screen, width, height );
     HGDIOBJ old_bitmap = SelectObject( dc, bitmap );
-    draw_panel( dc, width, height, today, tiles, L"Monday, November 16", L"13:25", dpi );
+    draw_panel( dc, width, height, today, tiles, L"Mon Nov 16", L"13:25", dpi );
     SelectObject( dc, old_bitmap );
     write_bitmap( dc, bitmap, width, height, path );
     DeleteObject( bitmap );
