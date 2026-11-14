@@ -1,6 +1,6 @@
 # Spec: reading desktops and windows
 
-The tests go in `tests\test_desktops.cpp`, in `void test_desktops();`, made of `check()` calls from `tests\check.h`. They only read. They never switch, create or rename desktops.
+The tests go in `tests\test_desktops.cpp`, in `void test_desktops();`, made of `check()` calls from `tests\check.h`. They only read. They never make any change to the desktops.
 
 ## Interface (`src\desktops.h`, added to what is already there)
 

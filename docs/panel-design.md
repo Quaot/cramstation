@@ -106,7 +106,7 @@ The Pomodoro buttons run `C:\Code\Youtonomous\build\youtonomous.exe` with the vi
 
 ## Testing
 
-The tests come before the code and are written from this design, not from the program. Each behaviour below is written up as a short spec with exact inputs and expected results. An agent that has not seen the implementation then writes the tests from that spec alone, and they are run once to see them fail. Only then is the code written, and it is finished when every test passes. A failing test means the code is wrong; a test changes only if it disagrees with the spec, and then the spec is corrected first. The same is done for Crammy's existing behaviour: a spec of what it does now, and blind tests written from it.
+The tests come before the code and are written from this design, not from the program. Each behaviour below is written up as a short spec with exact inputs and expected results. Someone who has not seen the code then writes the tests from that spec alone, and they are run once to see them fail. Only then is the code written, and it is finished when every test passes. A failing test means the code is wrong; a test changes only if it disagrees with the spec, and then the spec is corrected first. The same is done for Crammy's existing behaviour: a spec of what it does now, and blind tests written from it.
 
 Everything that can be checked without the owner's screen goes into `tests\test.cmd`:
 
@@ -122,3 +122,7 @@ Creating desktops and the Windhawk mod cannot be checked in a hidden window. The
 - Exact sizes and spacing, within the style above.
 - How the tray menu and panel share code with the existing main window.
 - The order of work and the commit split.
+
+## Changes after review
+
+Once the panel was built, the owner redesigned it to be smaller and plainer. It is now about 300 px wide and grows upward from the taskbar. The classes are short rows with the kind as a lower-case code, and the desktops are chips four to a row. The Pomodoro and Setups buttons became red text links. A review of the whole branch then led to these fixes. A timetable error is drawn under the class rows, so it no longer hides them. A missing `timetable.txt` and the first mistake in `settings.txt` are shown in the message line. `--panel` starts the background copy directly, and `--background --show` only shows the panel. A class click waits for a new desktop to appear before switching to it. The Windhawk mod lets the panel take the focus.

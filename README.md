@@ -27,9 +27,15 @@ crammy --edit
 
 ## The panel
 
-The panel is a small window above the bottom-left corner of the taskbar. It shows today's classes from the timetable, a tile for each virtual desktop with the icons of what is open on it, and two Pomodoro buttons that start Youtonomous on the 3-hour or the 1.5-hour video. Clicking a class goes to that subject's desktop, makes it if it is missing, and opens the subject's setup there when nothing is open yet. Clicking a tile switches to that desktop.
+The panel is a window about 300 pixels wide. It opens above the bottom-left corner of the taskbar and grows upward to fit what it shows. The top line has the date, with the time at the right.
 
-Open it with Ctrl+Alt+C, with the Crammy icon in the tray, or with the Crammy button on the taskbar. The taskbar button comes from a Windhawk mod; see `windhawk\README.md`. The shortcut and the tray icon work without it.
+Under the date is a row for each of today's classes from the timetable. A row starts with the start time and the course. After them comes the kind as a lower-case code from Quest, such as `lec` or `tut`. Only the class on now, or the next one today, is drawn in red. That row also shows the room, and at the right the minutes until it starts, such as `25m`, or `now` while it is on. A course with no folder in Downloads is grey. A mistake in the timetable or the settings is shown in one line under the classes.
+
+Below the classes is a chip for each virtual desktop, four to a row, with its name and the icons of up to 3 programs open on it. The chip of the desktop showing has a red outline. At the bottom are plain red text links. `Pomodoro 3h` and `1.5h` start Youtonomous on the long or the short video. `Setups…` brings up the main window.
+
+Clicking a class goes to the desktop named after its course number, and makes that desktop if it is missing. When nothing is open there yet, the subject's setup opens on it. Clicking a chip switches to that desktop.
+
+Open the panel with Ctrl+Alt+C or with the Crammy icon in the tray. The Crammy button on the taskbar opens it as well. That button comes from a Windhawk mod (see `windhawk\README.md`), and the shortcut and the tray icon work without it.
 
 These work while Crammy runs in the background. Start it with `crammy --background`, or choose Start at sign-in in the tray menu to make a shortcut in the Startup folder that does so each time you sign in. `crammy --panel` shows the panel and starts the background copy first when it is not running.
 
