@@ -24,7 +24,7 @@ bool create_desktop( const wstring &name, wstring &problem );   // not called by
 
 - `desktop_names()` is not empty, and has no empty names.
 - `current_desktop_index()` is between 0 and the number of names minus 1.
-- The test makes a visible, titled top-level window placed off screen, at x = -32000 and y = -32000, sized 200 by 100, with a unique title. Then it calls `windows_by_desktop()`:
+- The test makes a visible, titled top-level window placed off screen, at x = -32000 and y = -32000, sized 200 by 100, with a unique title. It must be an ordinary application window that Explorer tracks on a desktop: give it the extended style `WS_EX_APPWINDOW`, and no `WS_EX_TOOLWINDOW` or `WS_EX_NOACTIVATE`, since Explorer leaves windows with those styles off every desktop. Then it calls `windows_by_desktop()`:
   - the result includes that window;
   - its `desktop_index` equals `current_desktop_index()`;
   - its `program_path` matches the test program's own path, compared without regard to case.
