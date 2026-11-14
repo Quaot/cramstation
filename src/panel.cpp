@@ -557,3 +557,7 @@ void toggle_panel() {
     if ( GetTickCount64() - panel.closed_at < 300 ) return;
     open_panel( L"" );
 }
+
+void show_panel() {
+    if ( !panel.window ) open_panel( L"" );
+}

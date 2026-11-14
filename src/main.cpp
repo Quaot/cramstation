@@ -154,7 +154,7 @@ int WINAPI wWinMain( HINSTANCE, HINSTANCE, PWSTR, int ) {
 
     if ( action == L"background" ) {
         if ( background_is_running() ) {
-            if ( show ) ask_running_crammy_to_toggle_panel();
+            if ( show ) ask_running_crammy_to_show_panel();
             return 0;
         }
         return run_background( show );

@@ -132,7 +132,9 @@ void show_tray_menu( HWND window ) {
 
 LRESULT CALLBACK background_proc( HWND window, UINT message, WPARAM wparam, LPARAM lparam ) {
     if ( message == show_panel_message() ) {
-        toggle_panel();
+        // wparam 1 asks only to show the panel; 0 shows or hides it
+        if ( wparam == 1 ) show_panel();
+        else toggle_panel();
         return 0;
     }
     if ( message == taskbar_created_message ) {
@@ -179,6 +181,11 @@ bool ask_running_crammy_to_toggle_panel() {
     return window && PostMessageW( window, show_panel_message(), 0, 0 );
 }
 
+bool ask_running_crammy_to_show_panel() {
+    HWND window = find_background_window();
+    return window && PostMessageW( window, show_panel_message(), 1, 0 );
+}
+
 wstring startup_shortcut_path() {
     wchar_t override_folder[MAX_PATH * 4];
     DWORD length = GetEnvironmentVariableW( L"CRAMMY_STARTUP_FOLDER", override_folder, MAX_PATH * 4 );
@@ -222,7 +229,7 @@ int run_background( bool show_panel_now ) {
     // Another program may already own the shortcut; the tray icon still works without it.
     if ( !RegisterHotKey( window, hotkey_id, modifiers | MOD_NOREPEAT, key ) ) {}
 
-    if ( show_panel_now ) toggle_panel();
+    if ( show_panel_now ) show_panel();
     run_message_loop();
     return 0;
 }

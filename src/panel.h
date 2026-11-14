@@ -7,6 +7,9 @@
 // Opens the panel above the bottom-left corner of the taskbar, or closes it when it is open.
 void toggle_panel();
 
+// Opens the panel when it is not open; an open panel stays as it is.
+void show_panel();
+
 // Brings the main window forward, or opens it when it is not open.
 void show_setups();
 
