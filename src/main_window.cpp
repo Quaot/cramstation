@@ -4,6 +4,7 @@
 
 #include <cwctype>
 
+#include "background.h"
 #include "canvas.h"
 #include "desktops.h"
 #include "dialogs.h"
@@ -295,7 +296,7 @@ LRESULT CALLBACK main_proc( HWND window, UINT message, WPARAM wparam, LPARAM lpa
         return 0;
     case WM_DESTROY:
         DeleteObject( ui.font );
-        PostQuitMessage( 0 );
+        if ( !this_program_is_in_background() ) PostQuitMessage( 0 );   // the background Crammy keeps running
         return 0;
     }
     return DefWindowProcW( window, message, wparam, lparam );

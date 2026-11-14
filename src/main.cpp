@@ -7,11 +7,15 @@
 //   crammy --list "ECE 150: Exam"             the PDFs that setup can pick
 //   crammy --check                            problems in profiles.txt
 //   crammy --edit                             the profile editor
+//   crammy --background [--show]              the tray icon and shortcut, with no window
+//   crammy --panel                            shows the panel of the background Crammy
 
 #include <windows.h>
 #include <objbase.h>
 
+#include "background.h"
 #include "launch.h"
+#include "tiling.h"
 #include "ui.h"
 
 namespace {
@@ -103,6 +107,14 @@ int open_with_picks( const setup &chosen, const vector<wstring> &pick_texts, boo
     return problems.empty() ? 0 : 1;
 }
 
+// Started through explorer.exe so that it is not tied to whatever started this program.
+void start_background_with_panel() {
+    wchar_t path[MAX_PATH * 4];
+    DWORD length = GetModuleFileNameW( nullptr, path, MAX_PATH * 4 );
+    wstring command = L"explorer.exe " + quoted( wstring( path, length ) ) + L" --background --show";
+    start_process( command );
+}
+
 }  // namespace
 
 int WINAPI wWinMain( HINSTANCE, HINSTANCE, PWSTR, int ) {
@@ -112,7 +124,7 @@ int WINAPI wWinMain( HINSTANCE, HINSTANCE, PWSTR, int ) {
     wchar_t **arguments = CommandLineToArgvW( GetCommandLineW(), &count );
     wstring setup_title, action;
     vector<wstring> pick_texts;
-    bool separate = false;
+    bool separate = false, show = false;
 
     for ( int i = 1; i < count; ++i ) {
         wstring flag = lower( arguments[i] );
@@ -123,9 +135,22 @@ int WINAPI wWinMain( HINSTANCE, HINSTANCE, PWSTR, int ) {
         else if ( flag == L"--list" ) { action = L"list"; if ( has_value ) setup_title = arguments[++i]; }
         else if ( flag == L"--check" ) action = L"check";
         else if ( flag == L"--edit" ) action = L"edit";
+        else if ( flag == L"--background" ) action = L"background";
+        else if ( flag == L"--show" ) show = true;
+        else if ( flag == L"--panel" ) action = L"panel";
         else { say( L"Unknown option: " + wstring( arguments[i] ) ); return 2; }
     }
     LocalFree( arguments );
+
+    if ( action == L"background" ) {
+        if ( background_is_running() ) return 0;
+        return run_background( show );
+    }
+
+    if ( action == L"panel" ) {
+        if ( !ask_running_crammy_to_toggle_panel() ) start_background_with_panel();
+        return 0;
+    }
 
     if ( action == L"edit" ) {
         show_editor( nullptr );
