@@ -103,3 +103,10 @@ Setup titles: "ECE 150: Lecture", "ECE 150: Exam", "Math 117: Lecture", "ENGL 19
 - ECE 150 LAB, on an empty "150", gives setup "" (labs only switch).
 - ENGL 192 LEC, on an empty "192", gives setup "ENGL 192: Lecture".
 - Names are matched exactly, never partly: a class never chooses "Main", and "150" does not match a desktop named "1500".
+
+## The panel window and the timetable file
+
+These are window behaviours, checked by the owner on screen, not by `build_today`:
+
+- When `timetable.txt` does not exist, the panel passes the error `cannot find <path>` to `build_today`, so the message reads `timetable.txt: cannot find <path>`.
+- The panel always draws the class rows it has. The message line, when there is one, is drawn under the rows. With no rows, the message is the only line.
