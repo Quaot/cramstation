@@ -1,4 +1,4 @@
-# Cramstation profiles. The Cramstation window writes this file, and you can also edit it by hand.
+# Crammy profiles. The Crammy window writes this file, and you can also edit it by hand.
 #
 # [Subject] starts a subject. [Subject: Setup] adds a setup to it.
 #
@@ -25,8 +25,8 @@
 root = Downloads\ECE 105
 
 [ECE 105: Exam]
-left = notes
 right = pick "6 Exams" "2 Practice"
+left = notes
 
 [ECE 105: Lecture]
 full = newest "1 Lectures\PDF\ECE105-L*.pdf"

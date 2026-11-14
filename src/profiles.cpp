@@ -5,7 +5,7 @@
 namespace {
 
 const wchar_t *header =
-    L"# Cramstation profiles. The Cramstation window writes this file, and you can also edit it by hand.\r\n"
+    L"# Crammy profiles. The Crammy window writes this file, and you can also edit it by hand.\r\n"
     L"#\r\n"
     L"# [Subject] starts a subject. [Subject: Setup] adds a setup to it.\r\n"
     L"#\r\n"

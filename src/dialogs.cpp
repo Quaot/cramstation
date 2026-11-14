@@ -239,7 +239,7 @@ name_answer ask_for_name( HWND owner, const wchar_t *title, const vector<wstring
     name_dialog = {};
     name_dialog.dpi = GetDpiForSystem();
     UINT dpi = name_dialog.dpi;
-    HWND window = make_window( L"CramstationName", name_proc, title, scaled( 420, dpi ), scaled( 200, dpi ), owner,
+    HWND window = make_window( L"CrammyName", name_proc, title, scaled( 420, dpi ), scaled( 200, dpi ), owner,
                                WS_POPUP | WS_CAPTION | WS_SYSMENU );
     name_dialog.window = window;
     name_dialog.font = make_font( dpi, L"Segoe UI", 10 );
@@ -272,7 +272,7 @@ pick_answer ask_for_picks( HWND owner, const setup &chosen ) {
     picker.chosen = &chosen;
     picker.dpi = GetDpiForSystem();
     UINT dpi = picker.dpi;
-    HWND window = make_window( L"CramstationPick", pick_proc, ( L"Open " + chosen.title ).c_str(), scaled( 760, dpi ),
+    HWND window = make_window( L"CrammyPick", pick_proc, ( L"Open " + chosen.title ).c_str(), scaled( 760, dpi ),
                                scaled( 520, dpi ), owner );
     picker.window = window;
     picker.font = make_font( dpi, L"Segoe UI", 10 );

@@ -2,7 +2,7 @@
 // fake drops in code. Prints one line per check and returns 1 if any failed.
 //
 //   tests\test.cmd                  runs the checks
-//   cramstation_test.exe shot.bmp   also saves a picture of a sample setup
+//   crammy_test.exe shot.bmp   also saves a picture of a sample setup
 
 #include <windows.h>
 #include <ole2.h>

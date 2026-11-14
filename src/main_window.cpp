@@ -170,7 +170,7 @@ void delete_setup() {
     const setup *chosen = current_setup();
     if ( !chosen ) return;
     wstring question = L"Delete " + chosen->title + L"? Its files stay where they are.";
-    if ( MessageBoxW( ui.window, question.c_str(), L"Cramstation", MB_YESNO | MB_ICONQUESTION ) != IDYES ) return;
+    if ( MessageBoxW( ui.window, question.c_str(), L"Crammy", MB_YESNO | MB_ICONQUESTION ) != IDYES ) return;
     profile_block &profile = ui.book.profiles[chosen->profile_index];
     if ( chosen->setup_index >= 0 ) profile.setups.erase( profile.setups.begin() + chosen->setup_index );
     if ( chosen->setup_index < 0 || ( profile.setups.empty() && profile.items.empty() ) ) {
@@ -213,7 +213,7 @@ void open_current() {
     if ( !problems.empty() ) {
         wstring text;
         for ( const wstring &problem : problems ) text += problem + L"\r\n";
-        MessageBoxW( nullptr, text.c_str(), L"Cramstation", MB_ICONINFORMATION );
+        MessageBoxW( nullptr, text.c_str(), L"Crammy", MB_ICONINFORMATION );
     }
     DestroyWindow( ui.window );
 }
@@ -308,7 +308,7 @@ void show_main_window( const wstring &start_setup ) {
     InitCommonControlsEx( &common );
     ui.dpi = GetDpiForSystem();
 
-    HWND window = make_window( L"CramstationMain", main_proc, L"Cramstation", scaled( 1040, ui.dpi ), scaled( 660, ui.dpi ), nullptr );
+    HWND window = make_window( L"CrammyMain", main_proc, L"Crammy", scaled( 1040, ui.dpi ), scaled( 660, ui.dpi ), nullptr );
     ui.book = load_book();
     wstring title = start_setup.empty() ? trim( read_text_file( last_setup_path() ) ) : start_setup;
     fill_setup_list( title );

@@ -85,7 +85,7 @@ void insert_folder_path() {
 // Returns false when the user cancels closing
 bool ask_to_save() {
     if ( !SendMessageW( editor.text_box, EM_GETMODIFY, 0, 0 ) ) return true;
-    int answer = MessageBoxW( editor.window, L"Save the changes to profiles.txt?", L"Cramstation", MB_YESNOCANCEL | MB_ICONQUESTION );
+    int answer = MessageBoxW( editor.window, L"Save the changes to profiles.txt?", L"Crammy", MB_YESNOCANCEL | MB_ICONQUESTION );
     if ( answer == IDCANCEL ) return false;
     if ( answer == IDYES ) save();
     return true;
@@ -165,12 +165,12 @@ void show_editor( HWND owner ) {
     window_class.hInstance = GetModuleHandleW( nullptr );
     window_class.hCursor = LoadCursorW( nullptr, IDC_ARROW );
     window_class.hbrBackground = reinterpret_cast<HBRUSH>( COLOR_BTNFACE + 1 );
-    window_class.lpszClassName = L"CramstationEditor";
+    window_class.lpszClassName = L"CrammyEditor";
     window_class.hIcon = LoadIconW( window_class.hInstance, MAKEINTRESOURCEW( 1 ) );
     RegisterClassExW( &window_class );
 
     RECT place = centred_on_screen( scaled( 900, editor.dpi ), scaled( 640, editor.dpi ) );
-    HWND window = CreateWindowExW( 0, window_class.lpszClassName, L"Cramstation: edit profiles",
+    HWND window = CreateWindowExW( 0, window_class.lpszClassName, L"Crammy: edit profiles",
                                    WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, place.left, place.top,
                                    place.right - place.left, place.bottom - place.top, owner, nullptr,
                                    window_class.hInstance, nullptr );

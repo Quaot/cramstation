@@ -1,4 +1,4 @@
-"""Draws cramstation.ico: two sheets side by side, engraved in ink on red, to sit next to PdfCraft."""
+"""Draws crammy.ico: two sheets side by side, engraved in ink on red, to sit next to PdfCraft."""
 
 from pathlib import Path
 
@@ -94,7 +94,7 @@ def main():
     detailed = draw(True)
     simple = draw(False)
     frames = [(simple if size <= 24 else detailed).resize((size, size), Image.LANCZOS) for size in SIZES]
-    frames[-1].save(here.parent / "cramstation.ico", sizes=[(s, s) for s in SIZES], append_images=frames[:-1])
+    frames[-1].save(here.parent / "crammy.ico", sizes=[(s, s) for s in SIZES], append_images=frames[:-1])
 
 
 if __name__ == "__main__":

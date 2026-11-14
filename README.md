@@ -1,10 +1,10 @@
-# Cramstation
+# Crammy
 
-Cramstation opens the files for a study session and puts each window in its place. A lecture setup can open this week's slides on the left and the summary sheet in Acrobat on the right, on that subject's own desktop.
+Crammy opens the files for a study session and puts each window in its place. A lecture setup can open this week's slides on the left and the summary sheet in Acrobat on the right, on that subject's own desktop.
 
 ## Use
 
-Run `cramstation.exe`. Setups are listed on the left and the middle shows a picture of your screen. Press Open, or double-click a setup, to open it. The last setup you opened is selected next time.
+Run `crammy.exe`. Setups are listed on the left and the middle shows a picture of your screen. Press Open, or double-click a setup, to open it. The last setup you opened is selected next time.
 
 To build a setup, press New setup, then drag PDFs or folders from File Explorer onto the picture. Dropping on the left or right third fills that half of the screen; the middle fills the whole screen. Tiles can be dragged from one side to the other. Right-click a tile to open it in Acrobat, or to make it always open the newest file like it, which suits weekly slides. A folder becomes a list you tick from each time you open the setup. Every change is saved straight away.
 
@@ -13,12 +13,12 @@ Edit as text opens `profiles.txt` in a small editor for anything the picture doe
 It also runs from a terminal:
 
 ```
-cramstation --setup "ECE 150: Exam" --pick F24-F
-cramstation --setup "Math 115: Exam" --pick F23-F F23-M --separate
-cramstation --list
-cramstation --list "ECE 150: Exam"
-cramstation --check
-cramstation --edit
+crammy --setup "ECE 150: Exam" --pick F24-F
+crammy --setup "Math 115: Exam" --pick F23-F F23-M --separate
+crammy --list
+crammy --list "ECE 150: Exam"
+crammy --check
+crammy --edit
 ```
 
 `--pick` takes the PDF with that exact name, or else the newest one whose name contains the text. `--separate` gives each picked PDF its own window.
@@ -55,7 +55,7 @@ A side is `left` or `right`, or `full` for the whole screen. When several window
 
 Ending a PDF line with `with acrobat` opens it in Adobe Acrobat in place of PdfCraft. Paths start from the root unless they are absolute. `*` matches any text in a file name, and variables such as `%USERPROFILE%` are expanded. Answer files go in `2 Practice` when the course has one. Set `notes folder = ...` to change that.
 
-`desktop = 150` switches to the virtual desktop named 150 before anything opens, so each subject can keep its own desktop. Cramstation presses Ctrl+Win+Left or Right as many times as it takes and reads the desktop names from the registry.
+`desktop = 150` switches to the virtual desktop named 150 before anything opens, so each subject can keep its own desktop. Crammy presses Ctrl+Win+Left or Right as many times as it takes and reads the desktop names from the registry.
 
 A setup starts with every line of its profile, so lines shared by all setups can go under the profile heading.
 

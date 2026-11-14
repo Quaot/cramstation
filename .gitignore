@@ -1,4 +1,4 @@
-cramstation.exe
+crammy.exe
 *.res
 last setup.txt
-tests/cramstation_test.exe
+tests/crammy_test.exe

@@ -1,12 +1,12 @@
-// Cramstation opens study windows side by side from profiles in profiles.txt.
+// Crammy opens study windows side by side from profiles in profiles.txt.
 //
-//   cramstation                                    the launcher
-//   cramstation --setup "ECE 150: Exam"            the launcher, on that setup
-//   cramstation --setup "ECE 150: Exam" --pick F24-F F24-M [--separate]
-//   cramstation --list                             every setup
-//   cramstation --list "ECE 150: Exam"             the PDFs that setup can pick
-//   cramstation --check                            problems in profiles.txt
-//   cramstation --edit                             the profile editor
+//   crammy                                    the launcher
+//   crammy --setup "ECE 150: Exam"            the launcher, on that setup
+//   crammy --setup "ECE 150: Exam" --pick F24-F F24-M [--separate]
+//   crammy --list                             every setup
+//   crammy --list "ECE 150: Exam"             the PDFs that setup can pick
+//   crammy --check                            problems in profiles.txt
+//   crammy --edit                             the profile editor
 
 #include <windows.h>
 #include <objbase.h>
@@ -31,7 +31,7 @@ HANDLE output() {
 void say( const wstring &text ) {
     HANDLE handle = output();
     if ( !handle ) {
-        MessageBoxW( nullptr, text.c_str(), L"Cramstation", MB_OK );
+        MessageBoxW( nullptr, text.c_str(), L"Crammy", MB_OK );
         return;
     }
     wstring line = text + L"\r\n";

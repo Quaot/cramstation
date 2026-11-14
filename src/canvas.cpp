@@ -531,7 +531,7 @@ HWND create_canvas( HWND parent, HFONT font, UINT dpi ) {
     window_class.lpfnWndProc = canvas_proc;
     window_class.hInstance = GetModuleHandleW( nullptr );
     window_class.hCursor = LoadCursorW( nullptr, IDC_ARROW );
-    window_class.lpszClassName = L"CramstationCanvas";
+    window_class.lpszClassName = L"CrammyCanvas";
     RegisterClassExW( &window_class );
 
     canvas.dpi = dpi;
