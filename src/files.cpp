@@ -86,18 +86,23 @@ static wstring newest_matching( const wstring &pattern ) {
     return newest.empty() ? L"" : join_path( parent_folder( pattern ), newest );
 }
 
-wstring notes_file( const setup &chosen, const layout_item &notes_item, const wstring &first_pdf ) {
-    wstring path;
-    if ( !notes_item.paths.empty() ) {
-        path = notes_item.paths[0];
-    } else {
-        static const std::wregex paper_tags( L"\\s*\\((blank|mock version)[^)]*\\)", std::regex_constants::icase );
-        wstring base = first_pdf.empty() ? L"Notes" : std::regex_replace( stem( first_pdf ), paper_tags, L"" );
-        path = newest_matching( join_path( chosen.notes_folder, base + L" - my answers*.txt" ) );
-        if ( path.empty() ) path = join_path( chosen.notes_folder, base + L" - my answers (" + today_text() + L").txt" );
-    }
+wstring notes_file_name( const setup &chosen, const layout_item &notes_item, const wstring &first_pdf ) {
+    if ( !notes_item.paths.empty() ) return notes_item.paths[0];
+    static const std::wregex paper_tags( L"\\s*\\((blank|mock version)[^)]*\\)", std::regex_constants::icase );
+    wstring base = first_pdf.empty() ? L"Notes" : std::regex_replace( stem( first_pdf ), paper_tags, L"" );
+    wstring path = newest_matching( join_path( chosen.notes_folder, base + L" - my answers*.txt" ) );
+    if ( path.empty() ) path = join_path( chosen.notes_folder, base + L" - my answers (" + today_text() + L").txt" );
+    return path;
+}
+
+void create_notes_file( const wstring &path ) {
     if ( !is_file( path ) ) {
         write_text_file( path, stem( path ) + L"\r\nStart time:\r\nFinish time:\r\n\r\n" );
     }
+}
+
+wstring notes_file( const setup &chosen, const layout_item &notes_item, const wstring &first_pdf ) {
+    wstring path = notes_file_name( chosen, notes_item, first_pdf );
+    create_notes_file( path );
     return path;
 }

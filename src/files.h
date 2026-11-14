@@ -16,5 +16,11 @@ bool is_answer_key( const wstring &name );
 // "ECE190-W10-Slides.pdf" becomes "ECE190-W*-Slides.pdf", or "" when the name has no week or lecture number.
 wstring newest_pattern( const wstring &path );
 
-// The text file Notepad++ opens for a "notes" window.
+// The path of the text file Notepad++ opens for a "notes" window. Creates nothing.
+wstring notes_file_name( const setup &chosen, const layout_item &notes_item, const wstring &first_pdf );
+
+// Writes the starting text of a notes file, unless the file exists.
+void create_notes_file( const wstring &path );
+
+// notes_file_name, then create_notes_file.
 wstring notes_file( const setup &chosen, const layout_item &notes_item, const wstring &first_pdf );

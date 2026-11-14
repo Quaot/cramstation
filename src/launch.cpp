@@ -4,9 +4,9 @@
 #include "notes_tabs.h"
 #include "tiling.h"
 
-vector<wstring> open_setup( const setup &chosen, const vector<vector<wstring>> &picks, bool separate ) {
+vector<planned_window> plan_setup( const setup &chosen, const vector<vector<wstring>> &picks, bool separate,
+                                   vector<wstring> &problems ) {
     vector<planned_window> plan;
-    vector<wstring> problems;
     wstring first_pdf;
     vector<std::pair<size_t, const layout_item *>> notes_windows;
 
@@ -63,14 +63,26 @@ vector<wstring> open_setup( const setup &chosen, const vector<vector<wstring>> &
 
     if ( plan.size() == notes_windows.size() ) {
         problems.push_back( L"Nothing to open. Tick at least one PDF." );
-        return problems;
+        return {};
     }
 
     // A notes file is named after the first PDF, which is only known now
-    vector<wstring> notes_paths;
     for ( const auto &[plan_index, notes_item] : notes_windows ) {
-        plan[plan_index].paths = { notes_file( chosen, *notes_item, first_pdf ) };
-        notes_paths.push_back( plan[plan_index].paths[0] );
+        plan[plan_index].paths = { notes_file_name( chosen, *notes_item, first_pdf ) };
+    }
+    return plan;
+}
+
+vector<wstring> open_setup( const setup &chosen, const vector<vector<wstring>> &picks, bool separate ) {
+    vector<wstring> problems;
+    vector<planned_window> plan = plan_setup( chosen, picks, separate, problems );
+    if ( plan.empty() ) return problems;
+
+    vector<wstring> notes_paths;
+    for ( const planned_window &window : plan ) {
+        if ( window.app != program::notepad_pp ) continue;
+        create_notes_file( window.paths[0] );
+        notes_paths.push_back( window.paths[0] );
     }
 
     // Save and close the notes tabs from earlier setups, so Notepad++ does not fill up with them
