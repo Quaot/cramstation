@@ -87,9 +87,13 @@ void check_today_rows() {
 }
 
 void check_today_marking() {
-    today_section before = build_today( monday(), 790, known_courses(), {} );
-    check( only_marked( before, 3, L"in 20 min" ), "At 13:10 only the ECE 150 row is marked, with the note in 20 min." );
-    check( no_notes_on_unmarked( before ), "At 13:10 the rows that are not marked have no note." );
+    today_section inside = build_today( monday(), 790, known_courses(), {} );
+    check( only_marked( inside, 2, L"now" ), "At 13:10 only the MATH 117 lecture row is marked, with the note now." );
+    check( no_notes_on_unmarked( inside ), "At 13:10 the rows that are not marked have no note." );
+
+    today_section before = build_today( monday(), 805, known_courses(), {} );
+    check( only_marked( before, 3, L"in 5 min" ), "At 13:25 only the ECE 150 row is marked, with the note in 5 min." );
+    check( no_notes_on_unmarked( before ), "At 13:25 the rows that are not marked have no note." );
 
     today_section during = build_today( monday(), 825, known_courses(), {} );
     check( only_marked( during, 3, L"now" ), "At 13:45 only the ECE 150 row is marked, with the note now." );
