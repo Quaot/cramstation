@@ -65,7 +65,8 @@ Known courses are the seven with folders: ECE 105, ECE 150, ECE 190, ECE 198, EN
 - The rows are the meetings in the order given, each with its kind name.
 - `known` is false for GENE 119 and true for every other row.
 - **Marking**:
-  - At minute 790 (13:10), only the ECE 150 row (810) is marked, with note "in 20 min".
+  - At minute 790 (13:10), MATH 117 LEC (750-800) is on, so only that row is marked, with note "now".
+  - At minute 805 (13:25), MATH 117 LEC has ended, so only the ECE 150 row (810) is marked, with note "in 5 min".
   - At 825 (13:45), only the ECE 150 row is marked, with note "now", because it runs until 860.
   - At 860 (14:20, the moment ECE 150 ends), only MATH 115 is marked, with note "in 10 min".
   - At 400 (06:40), MATH 117 TUT is marked with note "" (it starts in more than 60 minutes).
