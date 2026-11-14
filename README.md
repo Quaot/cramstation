@@ -25,6 +25,16 @@ crammy --edit
 
 `--pick` takes the PDF with that exact name, or else the newest one whose name contains the text. `--separate` gives each picked PDF its own window.
 
+## The panel
+
+The panel is a small window above the bottom-left corner of the taskbar. It shows today's classes from the timetable, a tile for each virtual desktop with the icons of what is open on it, and two Pomodoro buttons that start Youtonomous on the 3-hour or the 1.5-hour video. Clicking a class goes to that subject's desktop, makes it if it is missing, and opens the subject's setup there when nothing is open yet. Clicking a tile switches to that desktop.
+
+Open it with Ctrl+Alt+C, with the Crammy icon in the tray, or with the Crammy button on the taskbar. The taskbar button comes from a Windhawk mod; see `windhawk\README.md`. The shortcut and the tray icon work without it.
+
+These work while Crammy runs in the background. Start it with `crammy --background`, or choose Start at sign-in in the tray menu to make a shortcut in the Startup folder that does so each time you sign in. `crammy --panel` shows the panel and starts the background copy first when it is not running.
+
+The timetable is `timetable.txt` and the settings are `settings.txt`, both next to the exe. The settings file may be missing; `docs/guide.md` lists its keys and says how to copy a new term's classes from Quest into the timetable.
+
 ## Profiles
 
 `profiles.txt` sits next to the exe. A profile names a root folder. Its setups say what opens on each side.
