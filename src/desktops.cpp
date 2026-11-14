@@ -93,3 +93,17 @@ wstring switch_to_desktop( const wstring &name ) {
     Sleep( 200 );
     return current_id() == ids[target] ? L"" : L"Could not switch to the desktop named '" + name + L"'.";
 }
+
+// Placeholders until these are built from tests\specs\desktops.md
+int current_desktop_index() {
+    return -1;
+}
+
+vector<window_on_desktop> windows_by_desktop() {
+    return {};
+}
+
+bool create_desktop( const wstring &, wstring &problem ) {
+    problem = L"Creating desktops is not built yet.";
+    return false;
+}

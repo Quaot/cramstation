@@ -18,6 +18,14 @@
 #include "../src/tiling.h"
 #include "../src/ui.h"
 
+void test_existing( HWND canvas );
+void test_timetable();
+void test_settings();
+void test_subjects();
+void test_panel();
+void test_background();
+void test_desktops();
+
 namespace {
 
 const wstring course = expand_variables( L"%USERPROFILE%\\Downloads\\ECE 190" );
@@ -215,6 +223,16 @@ int wmain( int argument_count, wchar_t **arguments ) {
     check_answer_keys();
     check_drops( canvas );
     check_notes_tabs();
+
+    // Written from the specs in tests\specs
+    test_existing( canvas );
+    test_timetable();
+    test_settings();
+    test_subjects();
+    test_panel();
+    test_background();
+    test_desktops();
+
     if ( argument_count > 1 ) save_picture( canvas, arguments[1] );
 
     std::printf( "%s\n", check_failures() ? "Some checks failed." : "All checks passed." );
