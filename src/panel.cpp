@@ -279,7 +279,10 @@ void read_panel_data() {
     panel.time = clock_text( minute_now );
 
     vector<wstring> errors;
-    vector<class_block> blocks = read_timetable( read_text_file( timetable_path() ), errors );
+    wstring timetable = timetable_path();
+    vector<class_block> blocks;
+    if ( is_file( timetable ) ) blocks = read_timetable( read_text_file( timetable ), errors );
+    else errors.push_back( L"cannot find " + timetable );
     calendar_date today{ now.wYear, now.wMonth, now.wDay };
     panel.today = build_today( classes_on( blocks, today ), minute_now, known_courses( blocks ), errors );
 
