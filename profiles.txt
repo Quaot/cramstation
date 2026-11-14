@@ -1,8 +1,6 @@
-# Cramstation profiles
+# Cramstation profiles. The Cramstation window writes this file, and you can also edit it by hand.
 #
-# [Name] starts a profile. [Name: Setup] adds a setup to it.
-# A setup starts with everything in its profile, then adds its own lines.
-# A profile with no setups opens as it is.
+# [Subject] starts a subject. [Subject: Setup] adds a setup to it.
 #
 # Settings
 #   root = Downloads\ECE 150     the folder other paths start from (inside your user folder)
@@ -10,18 +8,18 @@
 #   desktop = 150                switch to the virtual desktop with this name first
 #
 # Windows are written as  side = what
-#   side is left or right, or full for the whole screen.
-#   Several windows on one side stack top to bottom.
+#   side is left or right, or full for the whole screen. Windows on one side stack top to bottom.
 #
-#   notes                   Notepad with "<first PDF> - my answers (date).txt"
-#   notes "file.txt"        Notepad with that file, made if missing
-#   pdf "file.pdf"          one PdfCraft window with that PDF
-#   tabs "a.pdf" "b.pdf"    one PdfCraft window, one tab per PDF
-#   pick "folder" "file"    tick PDFs from these each time you open the setup
-#   folder "folder"         File Explorer on that folder
+#   notes                       Notepad with "<first PDF> - my answers (date).txt"
+#   notes "file.txt"            Notepad with that file, made if missing
+#   pdf "file.pdf"              one PDF
+#   newest "Lec*.pdf"           the newest PDF whose name fits; * matches any text
+#   tabs "a.pdf" "b.pdf"        one PdfCraft window, one tab per PDF
+#   pick "folder" "file"        tick PDFs from these each time you open the setup
+#   folder "folder"             File Explorer on that folder
 #
-# Paths go in quotes. A single path may skip them. * matches any text in a name,
-# and %USERPROFILE% and other variables work.
+# Add  with acrobat  at the end of a PDF line to open it in Adobe Acrobat in place of PdfCraft.
+
 
 [ECE 105]
 root = Downloads\ECE 105
@@ -29,6 +27,9 @@ root = Downloads\ECE 105
 [ECE 105: Exam]
 left = notes
 right = pick "6 Exams" "2 Practice"
+
+[ECE 105: Lecture]
+full = newest "1 Lectures\PDF\ECE105-L*.pdf"
 
 [ECE 105: Reading]
 full = pick "."
@@ -56,6 +57,10 @@ root = Downloads\ECE 190
 left = notes
 right = pick "6 Exams"
 
+[ECE 190: Lecture]
+left = newest "1 Lectures\PDF\ECE190-W*-Slides.pdf"
+right = newest "1 Lectures\PDF\ECE190-W*-Sum.pdf" with acrobat
+
 [ECE 190: Reading]
 full = pick "."
 
@@ -73,6 +78,9 @@ desktop = 192
 left = notes
 right = pick "2 Practice" "3 Assignments"
 
+[ENGL 192: Lecture]
+full = newest "1 Lectures\ENGL192-W*-Slides.pdf"
+
 [ENGL 192: Reading]
 full = pick "."
 
@@ -83,6 +91,9 @@ root = Downloads\Math 115
 [Math 115: Exam]
 left = notes
 right = pick "6 Exams" "2 Practice" "%USERPROFILE%\Downloads\Exam Bank\Math 115"
+
+[Math 115: Lecture]
+full = newest "1 Lectures\PDF\MATH115-W*-Shell.pdf"
 
 [Math 115: Reading]
 full = pick "."
@@ -96,9 +107,7 @@ left = notes
 right = pick "6 Exams" "2 Practice" "%USERPROFILE%\Downloads\Exam Bank\Math 117"
 
 [Math 117: Lecture]
-notes folder = Notebook
-left = notes
-right = pick "1 Lectures\PDF"
+full = newest "1 Lectures\PDF\MATH117-L*.pdf"
 
 [Math 117: Reading]
 full = pick "."
