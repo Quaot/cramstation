@@ -78,10 +78,6 @@ struct panel_layout {
     int height;
 };
 
-bool shows_rows( const today_section &today ) {
-    return today.message.empty();
-}
-
 panel_layout lay_out_panel( const today_section &today, const vector<desktop_tile> &tiles, int width, UINT dpi ) {
     auto px = [dpi]( int value ) { return scaled( value, dpi ); };
     panel_layout layout{};
@@ -89,12 +85,11 @@ panel_layout lay_out_panel( const today_section &today, const vector<desktop_til
 
     layout.header = { left, px( 6 ), right, px( 6 ) + px( header_height ) };
     int y = layout.header.bottom + px( 4 );
-    if ( shows_rows( today ) ) {
-        for ( size_t i = 0; i < today.rows.size(); ++i ) {
-            layout.rows.push_back( { 0, y, width, y + px( row_height ) } );
-            y += px( row_height );
-        }
-    } else {
+    for ( size_t i = 0; i < today.rows.size(); ++i ) {
+        layout.rows.push_back( { 0, y, width, y + px( row_height ) } );
+        y += px( row_height );
+    }
+    if ( !today.message.empty() ) {
         layout.message = { left, y, right, y + px( row_height ) };
         y += px( row_height );
     }
@@ -225,9 +220,8 @@ void draw_contents( HDC dc, int width, int height, const today_section &today, c
     write( dc, date_text, layout.header, fonts.date, ink, DT_SINGLELINE | DT_VCENTER | DT_LEFT );
     write( dc, time_text, layout.header, fonts.date, ink, DT_SINGLELINE | DT_VCENTER | DT_RIGHT );
 
-    if ( shows_rows( today ) )
-        for ( size_t i = 0; i < today.rows.size(); ++i ) draw_row( dc, today.rows[i], layout.rows[i], width, fonts, dpi );
-    else
+    for ( size_t i = 0; i < today.rows.size(); ++i ) draw_row( dc, today.rows[i], layout.rows[i], width, fonts, dpi );
+    if ( !today.message.empty() )
         write( dc, today.message, layout.message, fonts.text, ink, DT_SINGLELINE | DT_VCENTER | DT_END_ELLIPSIS );
     rule( dc, layout.rule_after_today, width, dpi );
 
