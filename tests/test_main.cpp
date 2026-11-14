@@ -1,8 +1,9 @@
-// Runs without showing anything: the canvas sits in a hidden window and gets
-// fake drops in code. Prints one line per check and returns 1 if any failed.
+// The canvas sits in a hidden window and gets fake drops in code. The notes check
+// starts its own minimized Notepad++ and closes it again. Prints one line per check
+// and returns 1 if any failed.
 //
 //   tests\test.cmd                  runs the checks
-//   crammy_test.exe shot.bmp   also saves a picture of a sample setup
+//   tests\crammy_test.exe shot.bmp  also saves a picture of a sample setup
 
 #include <windows.h>
 #include <ole2.h>
@@ -84,6 +85,16 @@ void check_newest_pattern() {
     check( newest_pattern( L"ECE190-W10-Slides.pdf" ) == L"ECE190-W*-Slides.pdf", "week numbers become *" );
     check( newest_pattern( L"PDF\\MATH117-L23.pdf" ) == L"PDF\\MATH117-L*.pdf", "lecture numbers become *" );
     check( newest_pattern( L"Formula sheet.pdf" ).empty(), "names without a number have no pattern" );
+}
+
+void check_answer_keys() {
+    check( is_answer_key( L"ECE150-Mock-1112a-S.pdf" ), "a name ending in -S is an answer key" );
+    check( is_answer_key( L"F25-M-S.pdf" ), "a short name ending in -S is an answer key" );
+    check( is_answer_key( L"F24-M-S (1).pdf" ) && is_answer_key( L"Week 3 solutions.pdf" ),
+           "the older key names still count" );
+    check( !is_answer_key( L"ECE190-W10-Slides.pdf" ) && !is_answer_key( L"ECE190-W10-Sum.pdf" ),
+           "slides and summaries are not answer keys" );
+    check( !is_answer_key( L"ECE150-Mock-1112a.pdf" ) && !is_answer_key( L"F25-M.pdf" ), "papers are not answer keys" );
 }
 
 void check_drops( HWND canvas ) {
@@ -207,6 +218,7 @@ int wmain( int argument_count, wchar_t **arguments ) {
 
     check_profiles_round_trip();
     check_newest_pattern();
+    check_answer_keys();
     check_drops( canvas );
     check_notes_tabs();
     if ( argument_count > 1 ) save_picture( canvas, arguments[1] );

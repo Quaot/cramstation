@@ -53,8 +53,10 @@ vector<pdf_file> find_pdfs( const vector<wstring> &paths, bool newest_first ) {
     return found;
 }
 
+// The renamed course files mark a key with -S at the end of the stem, as in "F25-M-S.pdf".
 bool is_answer_key( const wstring &name ) {
-    static const std::wregex key_names( L"answer key|-M-S \\(|-F-S\\b|solutions?\\b", std::regex_constants::icase );
+    static const std::wregex key_names( L"answer key|-M-S \\(|-F-S\\b|solutions?\\b|-S(\\.[^.]*)?$",
+                                        std::regex_constants::icase );
     return std::regex_search( name, key_names );
 }
 
