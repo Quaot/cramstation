@@ -15,8 +15,16 @@ struct planned_window {
 
 #include <initializer_list>
 
+#include <windows.h>
+
 // Presses the keys together, then lets them go in reverse order.
 void press_keys( std::initializer_list<unsigned short> keys );
+
+DWORD start_process( wstring command_line );
+wstring quoted( const wstring &text );
+vector<HWND> top_windows();
+wstring title_of( HWND hwnd );
+bool bring_to_front( HWND hwnd );
 
 // Starts every window, then moves each one to its part of the screen.
 // Returns a message for each window that never appeared.

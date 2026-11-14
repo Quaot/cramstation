@@ -33,23 +33,12 @@ const wchar_t *program_file( program app ) {
     return L"";
 }
 
-namespace {
-
-const wchar_t *pdfcraft_exe = program_file( program::pdfcraft );
-const wchar_t *acrobat_exe = program_file( program::acrobat );
-
-struct live_window {
-    planned_window plan;
-    RECT target{};
-    int rows = 1;               // windows sharing this side
-    DWORD process_id = 0;
-    HWND hwnd = nullptr;
-};
-
+// Programs start in the user folder, so none of them holds Crammy's own folder open
 DWORD start_process( wstring command_line ) {
     STARTUPINFOW startup{ sizeof( startup ) };
     PROCESS_INFORMATION info{};
-    if ( !CreateProcessW( nullptr, command_line.data(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &startup, &info ) ) {
+    wstring folder = user_folder();
+    if ( !CreateProcessW( nullptr, command_line.data(), nullptr, nullptr, FALSE, 0, nullptr, folder.c_str(), &startup, &info ) ) {
         return 0;
     }
     CloseHandle( info.hThread );
@@ -77,6 +66,29 @@ wstring title_of( HWND hwnd ) {
     GetWindowTextW( hwnd, title, 512 );
     return title;
 }
+
+// Windows only lets the program that sent the last key press change which window is in front.
+// F24 is on no keyboard, so pressing it changes nothing else.
+bool bring_to_front( HWND hwnd ) {
+    press_keys( { VK_F24 } );
+    SetForegroundWindow( hwnd );
+    Sleep( 100 );
+    return GetForegroundWindow() == hwnd;
+}
+
+namespace {
+
+const wchar_t *pdfcraft_exe = program_file( program::pdfcraft );
+const wchar_t *acrobat_exe = program_file( program::acrobat );
+
+struct live_window {
+    planned_window plan;
+    RECT target{};
+    int rows = 1;               // windows sharing this side
+    DWORD process_id = 0;
+    HWND hwnd = nullptr;
+};
+
 
 bool is_explorer( HWND hwnd ) {
     wchar_t class_name[64];
@@ -115,16 +127,6 @@ bool is_in_place( HWND hwnd, const RECT &target, int tolerance = 2 ) {
     RECT frame = visible_frame( hwnd );
     return std::abs( frame.left - target.left ) <= tolerance && std::abs( frame.top - target.top ) <= tolerance &&
            std::abs( frame.right - target.right ) <= tolerance && std::abs( frame.bottom - target.bottom ) <= tolerance;
-}
-
-
-// Windows only lets the program that sent the last key press change which window is in front.
-// F24 is on no keyboard, so pressing it changes nothing else.
-bool bring_to_front( HWND hwnd ) {
-    press_keys( { VK_F24 } );
-    SetForegroundWindow( hwnd );
-    Sleep( 100 );
-    return GetForegroundWindow() == hwnd;
 }
 
 // Snapping animates, so wait until the frame has stopped changing.
