@@ -283,7 +283,7 @@ The checks never take over the mouse or keyboard and never take screenshots of t
 
 - Variables, fields and parameters are `snake_case`. Function and type names follow the existing code.
 - Keep the code plain and readable, in small functions. Comments are few, and each one says why rather than what.
-- Commit as Justin Gu `<enderjustin@icloud.com>` with small, focused commits straight to `main`. No `Co-Authored-By` lines, no mention of AI anywhere, and no `CLAUDE.md` or `.claude` folder in the repo.
+- Commit as Justin Gu `<enderjustin@icloud.com>` with small, focused commits straight to `main`. No `Co-Authored-By` lines, and no files or notes from code-writing tools in the repo.
 - Commit messages and documentation use plain words and short sentences. Avoid figures of speech, including saying a file "lives" somewhere; say where it is. Avoid lists of exactly three items in prose; use two, or split the sentence.
 - Write the spec and the blind tests first (see Testing), then the code. A failing test is fixed in the code; a spec is corrected before any test that follows it.
 - Run `git pull --rebase --autostash` before pushing, and read the push output; a rejected push can look like success if the output is hidden.
