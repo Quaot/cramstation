@@ -106,7 +106,7 @@ int open_with_picks( const setup &chosen, const vector<wstring> &pick_texts, boo
 }  // namespace
 
 int WINAPI wWinMain( HINSTANCE, HINSTANCE, PWSTR, int ) {
-    CoInitializeEx( nullptr, COINIT_APARTMENTTHREADED );
+    OleInitialize( nullptr );   // drag and drop needs OLE, not just COM
 
     int count = 0;
     wchar_t **arguments = CommandLineToArgvW( GetCommandLineW(), &count );
@@ -159,7 +159,7 @@ int WINAPI wWinMain( HINSTANCE, HINSTANCE, PWSTR, int ) {
         return open_with_picks( *chosen, pick_texts, separate );
     }
 
-    show_launcher( chosen ? chosen->title : L"" );
+    show_main_window( chosen ? chosen->title : L"" );
     run_message_loop();
     return 0;
 }
