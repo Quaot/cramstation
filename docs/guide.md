@@ -6,7 +6,7 @@ This guide is for anyone changing Crammy. Read it once before touching the code.
 
 Crammy is a Win32 program in C++17 with no libraries beyond Windows itself. It reads `profiles.txt`, shows a window where setups can be built by dragging files, and opens a setup by starting PdfCraft, Adobe Acrobat, Notepad++ or File Explorer and moving each window to its place on the screen.
 
-It can also run in the background with a tray icon and a keyboard shortcut. From there it shows a panel with today's classes from `timetable.txt`, a tile for each virtual desktop, and two buttons that start Youtonomous.
+It can also run in the background with a tray icon and a keyboard shortcut. From there it shows a panel with today's classes from `timetable.txt` and a chip for each virtual desktop. Links at the bottom of the panel start Youtonomous or bring up the setups.
 
 Paths in this guide are relative to the repo folder unless they start with a drive letter. The owner's machine is set up like this:
 
@@ -15,7 +15,7 @@ Paths in this guide are relative to the repo folder unless they start with a dri
 | Source | `C:\Users\Justin\Desktop\Projects\Crammy` (repo `github.com/Quaot/crammy`, branch `main`) |
 | The program | `crammy.exe` in the repo folder, next to `profiles.txt`; built, not committed |
 | Desktop shortcut | `C:\Users\Justin\Desktop\Crammy.lnk`, pointing at `crammy.exe` |
-| `settings.txt` | Next to `crammy.exe`; not committed. The panel shortcut, the Youtonomous program and videos, and whether to start at sign-in. Every key has a default, so the file may be missing |
+| `settings.txt` | Next to `crammy.exe`; not committed. It holds the panel shortcut and the Youtonomous program and videos. It also says whether to start at sign-in. Every key has a default, so the file may be missing |
 | `timetable.txt` | Next to `crammy.exe`; committed. One line for each class block, copied from Quest |
 | Startup shortcut | `Crammy.lnk` in the user's Startup folder, running `crammy.exe --background`; made and removed by the tray menu |
 | Windhawk mod | `windhawk\crammy-button.wh.cpp`, added to Windhawk by hand; it puts the Crammy button on the taskbar |
@@ -69,7 +69,7 @@ Problems at any step are collected as plain sentences and shown at the end; noth
 | `src/desktops.cpp` | Reading virtual desktop names, switching between them, finding which desktop each window is on, and creating a desktop |
 | `src/timetable.cpp` | Reading `timetable.txt` and working out which classes meet on a date, with the date and weekday helpers |
 | `src/settings.cpp` | Reading and writing `settings.txt` and the shortcut text, and building the command that starts Youtonomous |
-| `src/subjects.cpp` | Matching a class to a desktop name and to a setup, plus two small helpers: the name of a class kind, and the check for a course folder in Downloads |
+| `src/subjects.cpp` | Matching a class to a desktop name and to a setup, plus two small helpers: `kind_name`, the word for a class kind (only used to fill `today_row`), and the check for a course folder in Downloads |
 | `src/panel_model.cpp` | What the panel shows and does, as plain data with no window: today's rows and the desktop tiles, and the plan for a class click (the types are in `panel_model.h`) |
 | `src/panel.cpp` | The panel window; `toggle_panel` in `panel.h` shows it or hides it, and `show_panel` only shows it |
 | `src/background.cpp` | Background mode: the hidden `CrammyBackground` window, the tray icon, the shortcut, the one-copy lock and the Startup shortcut |
@@ -131,7 +131,7 @@ A window with a side to itself is then snapped by pressing Win+Left or Win+Right
 
 **Reading and switching.** Windows keeps the desktops in the registry under `HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\VirtualDesktops`: `VirtualDesktopIDs` lists them in order, `CurrentVirtualDesktop` is the one showing, and each name is under `Desktops\{id}\Name`. An unnamed desktop is called "Desktop 2" and so on. `desktop_names` and `current_desktop_index` read this. `switch_to_desktop` presses Ctrl+Win+Left or Right as many times as needed and waits until the registry shows the new desktop. Moving another program's windows between desktops needs undocumented calls that change between Windows updates, which is why Crammy switches first and opens afterwards.
 
-**Windows on each desktop.** `windows_by_desktop` lists the top-level windows that are visible, have a title and have no owner. For each one it asks the documented `IVirtualDesktopManager::GetWindowDesktopId` and matches the answer to the ids in the registry. Windows whose desktop cannot be found are left out. Explorer does not track some windows on any desktop, such as tool windows (`WS_EX_TOOLWINDOW`) and windows that cannot be activated (`WS_EX_NOACTIVATE`), so these never appear. A test that needs a window on a desktop must make an ordinary application window.
+**Windows on each desktop.** `windows_by_desktop` lists the top-level windows that are visible and have a title. Windows with an owner are left out. For each one it asks the documented `IVirtualDesktopManager::GetWindowDesktopId` and matches the answer to the ids in the registry. Windows whose desktop cannot be found are left out. Explorer does not track some windows on any desktop, such as tool windows (`WS_EX_TOOLWINDOW`) and windows that cannot be activated (`WS_EX_NOACTIVATE`), so these never appear. A test that needs a window on a desktop must make an ordinary application window.
 
 **Creating a desktop.** There is no documented call for this. `create_desktop` reaches Explorer's `IVirtualDesktopManagerInternal` through the immersive shell service, using the interface for Windows 11 24H2 and later, which is build 26200 on this machine. The interface is called by slot number, so a wrong order would call the wrong method. The order was taken from MScholtes' `VirtualDesktop11-24H2.cs`, version 1.21 (github.com/MScholtes/VirtualDesktop), and the comment above `desktop_manager_internal` in `desktops.cpp` lists it. After a Windows update, check that list against the new build before trusting the calls. Crammy calls `CreateDesktop` and then `SetDesktopName`.
 
@@ -174,13 +174,25 @@ Windows 11 Notepad has no way for another program to save or close a tab, which 
 
 **Start at sign-in.** `set_start_at_sign_in` makes or removes `Crammy.lnk` in the user's Startup folder. The background Crammy calls it when it starts, so the shortcut matches the `start at sign in` setting. The shortcut runs `crammy.exe --background` from the folder of the running program. The folder comes from `FOLDERID_Startup`, unless the environment variable `CRAMMY_STARTUP_FOLDER` is set; then that folder is used. The tests set it to a folder in `%TEMP%` so that they never touch the real Startup folder. Do not set it for any other reason.
 
-**The panel.** It is a borderless window that opens above the bottom-left corner of the taskbar and closes when it loses focus or Esc is pressed. It shows the date and time, today's classes, a tile for every virtual desktop, and the buttons for the two Pomodoro videos and for Setups. `docs/panel-design.md` is the approved design, with the look it asks for. What the panel shows and what a click does are worked out in `panel_model.cpp`, without any window, so that they can be checked in tests. `panel.cpp` only draws that data and passes clicks to it.
+**The panel.** It is a borderless window, about 300 pixels wide, that opens above the bottom-left corner of the taskbar. Its height comes from what it shows, and it grows upward from the taskbar. It closes when it loses focus or Esc is pressed. `docs/panel-design.md` is the approved design; the owner made the panel smaller and plainer after it was built, and the end of that file says how.
 
-Clicking a class goes to the desktop named after the course number (`desktop_name_for`; `150` for ECE 150). If that desktop does not exist, it is created first. If nothing is open on it, the setup `<Subject>: Lecture` or `<Subject>: Tutorial` is opened there when it exists. Other kinds of class only switch. `plan_class_click` makes this plan.
+From the top, the panel has these parts. `lay_out_panel` in `panel.cpp` places them. `click` and `over_something` use the same rectangles as the drawing, so a click acts on what is drawn under the mouse.
 
-The Pomodoro buttons start Youtonomous through `youtonomous_command`, with the long or the short video from the settings. Nothing else starts Youtonomous.
+- The date line, with the date on the left and the time on the right.
+- A row for each class today. A row starts with the start time and the course, and then gives the kind as Quest's three-letter code in lower case, such as `lec`. Only the marked row (the class on now, or the next one today) is drawn in red, with a red bar at its left. That row alone also shows the room, and at the right `Nm` for the minutes until it starts or `now` while it is on. A course with no folder in Downloads is grey and does nothing when clicked.
+- The message line, under the rows, when `today_section.message` is not empty. A timetable error comes first. Without one, the line shows the first settings error, and with neither it reads `No classes today` on a day with no classes. With no rows, the message is the only line in this part. A timetable error never hides the rows.
+- A chip for each virtual desktop, four to a row, with the desktop's name and the icons of up to 3 programs open on it. The chip of the desktop showing has a red outline.
+- Plain red text links: `Pomodoro 3h` and `1.5h` on the left, and `Setups…` on the right. A link is underlined while the mouse is over it.
 
-**The Windhawk mod.** `windhawk\crammy-button.wh.cpp` hides the Widgets button on the taskbar and puts a Crammy button in its place. A click posts `CrammyShowPanel`, or runs `crammy.exe --panel` when the background window does not exist. Before either, it calls `AllowSetForegroundWindow`, because Explorer had the click and Windows only lets that program hand the focus on. For the post, it names the process of the `CrammyBackground` window; for `--panel`, it uses `ASFW_ANY`. It does nothing else, so that as little as possible runs inside Explorer. `windhawk\README.md` says how to add it and switch it off. The owner adds it himself.
+A problem from a click, such as a desktop that could not be made, is drawn under all of this when the panel opens again.
+
+What the panel shows and what a click does are worked out in `panel_model.cpp`, without any window, so that they can be checked in tests. `panel.cpp` only draws that data and passes clicks to it.
+
+Clicking a class goes to the desktop named after the course number (`desktop_name_for`; `150` for ECE 150). If that desktop does not exist, it is created first. The registry can take a moment to list the new desktop, so `open_class` waits until `desktop_names` has one more name, for up to 2 seconds, before it switches. If nothing is open on it, the setup `<Subject>: Lecture` or `<Subject>: Tutorial` is opened there when it exists. Other kinds of class only switch. `plan_class_click` makes this plan.
+
+The Pomodoro links start Youtonomous through `youtonomous_command`, with the long or the short video from the settings. Nothing else starts Youtonomous.
+
+**The Windhawk mod.** `windhawk\crammy-button.wh.cpp` hides the Widgets button on the taskbar and puts a Crammy button in its place. A click posts `CrammyShowPanel`, or runs `crammy.exe --panel` when the background window does not exist. Before either, it calls `AllowSetForegroundWindow`, because Explorer had the click, and Windows only lets the program with the last input give the focus to another program. For the post, it names the process of the `CrammyBackground` window; for `--panel`, it uses `ASFW_ANY`. It does nothing else, so that as little as possible runs inside Explorer. `windhawk\README.md` says how to add it and switch it off. The owner adds it himself.
 
 ## Timetable
 
@@ -195,13 +207,13 @@ The six fields are separated by `|`, and spaces around them are ignored.
 | Field | Meaning |
 |---|---|
 | Course | Kept as written, such as `ECE 150` |
-| Kind | Quest's code: `LEC`, `TUT`, `LAB`, `TST` or `SEM`. `kind_name` in `subjects.cpp` turns these into words, and any other code is shown in lower case |
+| Kind | Quest's code: `LEC`, `TUT`, `LAB`, `TST` or `SEM`. The panel shows the code in lower case. `kind_name` in `subjects.cpp` turns a code into a word, but it is only used to fill `today_row.kind_name`, which the panel does not draw |
 | Days | Quest's letters: `M`, `T`, `W`, `Th` and `F`. `MTTh` is Monday, Tuesday and Thursday, and `TTh` is Tuesday and Thursday |
 | Times | 24-hour `HH:MM-HH:MM`; the start must be before the end |
 | Room | Kept as written; `TBA` is a room like any other |
 | Dates | `YYYY-MM-DD to YYYY-MM-DD`, the first not after the last |
 
-Blank lines and lines starting with `#` are ignored. A line that cannot be read is skipped, and an error `line N: cannot read "..."` is kept. The panel shows the first error in one line, so a typo does not hide the rest of the day.
+Blank lines and lines starting with `#` are ignored. A line that cannot be read is skipped, and an error `line N: cannot read "..."` is kept. The panel shows the first error in one line under the class rows, so a typo does not hide the rest of the day. When the file does not exist, the error is `cannot find <path>`, and the line reads `timetable.txt: cannot find <path>`.
 
 **Which classes meet on a date.** `classes_on` takes a block when the weekday of the date is one of its days and the date is inside its range, both ends included. Blocks at different start times are separate classes, even for the same course and kind: on a lab day with two blocks, both show. When two blocks have the same course, the same kind and the same start time, only the one with the shorter date range is kept. This is how a one-off change replaces the usual block: a block for one Wednesday with another room wins over the block for the whole term. The classes are sorted by start time, then by course.
 
@@ -217,14 +229,14 @@ Edits to the file apply the next time the panel opens.
 
 ## Settings
 
-`settings.txt` is next to `crammy.exe`, in the same `key = value` style as `profiles.txt`. Lines starting with `#` and blank lines are ignored, key names ignore case, and spaces around the value are trimmed. A missing key keeps its default. An unknown key, a shortcut that cannot be read, or a `start at sign in` value other than `yes` or `no` gives an error `line N: ...` and keeps the default. The file may be missing altogether.
+`settings.txt` is next to `crammy.exe`, in the same `key = value` style as `profiles.txt`. Lines starting with `#` and blank lines are ignored. Key names ignore case, and spaces around the value are trimmed. A missing key keeps its default. An unknown key or a shortcut that cannot be read gives an error `line N: ...` and keeps the default. So does a `start at sign in` value other than `yes` or `no`. The panel shows the first error in its message line, as `settings.txt: line N: ...`, unless the timetable has an error, which comes first. The file may be missing altogether.
 
 | Key | Default | Meaning |
 |---|---|---|
 | `shortcut` | `Ctrl+Alt+C` | The keys that show the panel. Modifiers are Ctrl, Alt, Shift and Win, and at least one is needed. The key is a letter, a digit, F1 to F24 or Space |
-| `youtonomous` | `C:\Code\Youtonomous\build\youtonomous.exe` | The program the Pomodoro buttons start |
-| `pomodoro long` | `C:\Users\Justin\Videos\Youtonomous\74cOUSKXMz0.mp4` | The video for the 3-hour button |
-| `pomodoro short` | `C:\Users\Justin\Videos\Youtonomous\sdhh7AYzsTY.mp4` | The video for the 1.5-hour button |
+| `youtonomous` | `C:\Code\Youtonomous\build\youtonomous.exe` | The program the Pomodoro links start |
+| `pomodoro long` | `C:\Users\Justin\Videos\Youtonomous\74cOUSKXMz0.mp4` | The video for the 3-hour link |
+| `pomodoro short` | `C:\Users\Justin\Videos\Youtonomous\sdhh7AYzsTY.mp4` | The video for the 1.5-hour link |
 | `start at sign in` | `yes` | `yes` or `no` |
 
 `youtonomous_command` makes the command `"<program>" "<video>"`. When the program or the video is missing, it gives the sentence `Youtonomous was not found at <path>` or `The video was not found at <path>` for the panel to show.
@@ -251,7 +263,7 @@ The checks never take over the mouse or keyboard and never take screenshots of t
 - The timetable checks read the real `timetable.txt` and name days of the Fall 2026 term.
 - The settings checks make files in `%TEMP%\crammy settings checks`.
 - The background checks make a hidden window of the class `CrammyBackground` and set `CRAMMY_STARTUP_FOLDER` to a folder in `%TEMP%`. If a real background Crammy is running, they skip those checks and say so.
-- The desktops checks only read. They need an ordinary application window on the current desktop, so the test makes one off screen. They never switch, create or rename a desktop.
+- The desktops checks only read. They need an ordinary application window on the current desktop, so the test makes one off screen. They never make any change to the desktops.
 
 **Pictures.** `tests\crammy_test.exe out.bmp` draws a sample setup into `out.bmp`, which is the way to see a change to the screen picture. `tests\crammy_test.exe --panel-picture panel.bmp` draws the panel, with sample classes and desktops, into a `.bmp`. Use it to judge a change to the look of the panel, since the real panel is not shown during the checks.
 
