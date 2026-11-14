@@ -7,6 +7,7 @@
 #include "panel.h"
 #include "settings.h"
 #include "tiling.h"
+#include "timetable.h"
 #include "ui.h"
 
 const wchar_t *background_class_name = L"CrammyBackground";
@@ -91,7 +92,8 @@ void remove_tray_icon( HWND window ) {
 }
 
 void edit_timetable() {
-    wstring timetable = join_path( parent_folder( program_path() ), L"timetable.txt" );
+    wstring timetable = timetable_path();
+    if ( timetable.empty() ) timetable = join_path( parent_folder( program_path() ), L"timetable.txt" );
     start_process( quoted( program_file( program::notepad_pp ) ) + L" " + quoted( timetable ) );
 }
 
@@ -185,6 +187,10 @@ bool set_start_at_sign_in( bool on ) {
 }
 
 int run_background( bool show_panel_now ) {
+    // Held until the process ends, so two launches at the same moment cannot both go on.
+    HANDLE lock = CreateMutexW( nullptr, FALSE, L"CrammyBackgroundLock" );
+    if ( !lock || GetLastError() == ERROR_ALREADY_EXISTS ) return 0;
+
     HINSTANCE instance = GetModuleHandleW( nullptr );
     WNDCLASSW window_class = {};
     window_class.lpfnWndProc = background_proc;
@@ -199,7 +205,8 @@ int run_background( bool show_panel_now ) {
 
     UINT modifiers, key;
     shortcut_keys( modifiers, key );
-    RegisterHotKey( window, hotkey_id, modifiers | MOD_NOREPEAT, key );
+    // Another program may already own the shortcut; the tray icon still works without it.
+    if ( !RegisterHotKey( window, hotkey_id, modifiers | MOD_NOREPEAT, key ) ) {}
 
     if ( show_panel_now ) toggle_panel();
     run_message_loop();
