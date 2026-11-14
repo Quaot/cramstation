@@ -58,9 +58,20 @@ bool make_shortcut( const wstring &path ) {
     return made;
 }
 
-void shortcut_keys( UINT &modifiers, UINT &key ) {
+crammy_settings current_settings() {
     vector<wstring> errors;
-    crammy_settings settings = read_settings( read_text_file( settings_path() ), errors );
+    return read_settings( read_text_file( settings_path() ), errors );
+}
+
+void flip_start_at_sign_in() {
+    crammy_settings settings = current_settings();
+    settings.start_at_sign_in = !shortcut_exists();
+    write_text_file( settings_path(), write_settings( settings ) );
+    set_start_at_sign_in( settings.start_at_sign_in );
+}
+
+void shortcut_keys( UINT &modifiers, UINT &key ) {
+    crammy_settings settings = current_settings();
     modifiers = settings.shortcut_modifiers;
     key = settings.shortcut_key;
     if ( key == 0 ) {
@@ -111,9 +122,9 @@ void show_tray_menu( HWND window ) {
     UINT chosen = TrackPopupMenu( menu, TPM_RETURNCMD | TPM_RIGHTBUTTON, cursor.x, cursor.y, 0, window, nullptr );
     DestroyMenu( menu );
 
-    if ( chosen == menu_setups ) toggle_panel();
+    if ( chosen == menu_setups ) show_setups();
     else if ( chosen == menu_timetable ) edit_timetable();
-    else if ( chosen == menu_start_at_sign_in ) set_start_at_sign_in( !shortcut_exists() );
+    else if ( chosen == menu_start_at_sign_in ) flip_start_at_sign_in();
     else if ( chosen == menu_quit ) DestroyWindow( window );
 }
 
@@ -200,6 +211,7 @@ int run_background( bool show_panel_now ) {
     HWND window = CreateWindowExW( 0, background_class_name, L"Crammy", WS_OVERLAPPED, 0, 0, 0, 0, nullptr, nullptr, instance, nullptr );
     if ( !window ) return 1;
 
+    set_start_at_sign_in( current_settings().start_at_sign_in );
     taskbar_created_message = RegisterWindowMessageW( L"TaskbarCreated" );
     add_tray_icon( window );
 

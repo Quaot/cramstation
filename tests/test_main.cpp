@@ -4,6 +4,7 @@
 //
 //   tests\test.cmd                  runs the checks
 //   tests\crammy_test.exe shot.bmp  also saves a picture of a sample setup
+//   tests\crammy_test.exe --panel-picture panel.bmp  saves a picture of the panel instead
 
 #include <windows.h>
 #include <ole2.h>
@@ -15,6 +16,7 @@
 #include "../src/canvas.h"
 #include "../src/files.h"
 #include "../src/notes_tabs.h"
+#include "../src/panel.h"
 #include "../src/tiling.h"
 #include "../src/ui.h"
 
@@ -27,6 +29,8 @@ void test_background();
 void test_desktops();
 
 namespace {
+
+void write_bitmap( HDC dc, HBITMAP bitmap, int width, int height, const wchar_t *path );
 
 const wstring course = expand_variables( L"%USERPROFILE%\\Downloads\\ECE 190" );
 
@@ -190,11 +194,17 @@ void save_picture( HWND canvas, const wchar_t *path ) {
     HBITMAP bitmap = CreateCompatibleBitmap( screen, client.right, client.bottom );
     SelectObject( dc, bitmap );
     SendMessageW( canvas, WM_PRINTCLIENT, reinterpret_cast<WPARAM>( dc ), PRF_CLIENT );
+    write_bitmap( dc, bitmap, client.right, client.bottom, path );
+    DeleteObject( bitmap );
+    DeleteDC( dc );
+    ReleaseDC( nullptr, screen );
+}
 
-    BITMAPINFOHEADER header{ sizeof( header ), client.right, client.bottom, 1, 24, BI_RGB };
-    int row_bytes = ( ( client.right * 3 + 3 ) / 4 ) * 4;
-    vector<BYTE> pixels( row_bytes * client.bottom );
-    GetDIBits( dc, bitmap, 0, client.bottom, pixels.data(), reinterpret_cast<BITMAPINFO *>( &header ), DIB_RGB_COLORS );
+void write_bitmap( HDC dc, HBITMAP bitmap, int width, int height, const wchar_t *path ) {
+    BITMAPINFOHEADER header{ sizeof( header ), width, height, 1, 24, BI_RGB };
+    int row_bytes = ( ( width * 3 + 3 ) / 4 ) * 4;
+    vector<BYTE> pixels( row_bytes * height );
+    GetDIBits( dc, bitmap, 0, height, pixels.data(), reinterpret_cast<BITMAPINFO *>( &header ), DIB_RGB_COLORS );
     BITMAPFILEHEADER file_header{ 0x4D42, DWORD( sizeof( file_header ) + sizeof( header ) + pixels.size() ), 0, 0,
                                   sizeof( file_header ) + sizeof( header ) };
     HANDLE file = CreateFileW( path, GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, 0, nullptr );
@@ -203,6 +213,33 @@ void save_picture( HWND canvas, const wchar_t *path ) {
     WriteFile( file, &header, sizeof( header ), &written, nullptr );
     WriteFile( file, pixels.data(), DWORD( pixels.size() ), &written, nullptr );
     CloseHandle( file );
+}
+
+// Draws the panel for Mon Nov 16 at 13:25 with the real timetable and sample desktops
+void save_panel_picture( const wchar_t *path ) {
+    UINT dpi = GetDpiForSystem();
+    vector<wstring> errors;
+    wstring timetable = join_path( parent_folder( parent_folder( timetable_path() ) ), L"timetable.txt" );
+    vector<class_meeting> meetings = classes_on( read_timetable( read_text_file( timetable ), errors ), { 2026, 11, 16 } );
+    vector<wstring> known = { L"ECE 105", L"ECE 150", L"ECE 190", L"ECE 198", L"ENGL 192", L"Math 115", L"Math 117" };
+    today_section today = build_today( meetings, 805, known, errors );
+    wstring pdfcraft = program_file( program::pdfcraft ), notepad = program_file( program::notepad_pp );
+    wstring explorer = program_file( program::explorer );
+    vector<desktop_tile> tiles = {
+        { L"Main", false, { pdfcraft, notepad } },
+        { L"150", true, { pdfcraft } },
+        { L"192", false, {} },
+        { L"Bakfiets", false, { explorer } },
+    };
+
+    int width = scaled( 420, dpi ), height = panel_height( today, tiles, dpi );
+    HDC screen = GetDC( nullptr );
+    HDC dc = CreateCompatibleDC( screen );
+    HBITMAP bitmap = CreateCompatibleBitmap( screen, width, height );
+    HGDIOBJ old_bitmap = SelectObject( dc, bitmap );
+    draw_panel( dc, width, height, today, tiles, L"Monday, November 16", L"13:25", dpi );
+    SelectObject( dc, old_bitmap );
+    write_bitmap( dc, bitmap, width, height, path );
     DeleteObject( bitmap );
     DeleteDC( dc );
     ReleaseDC( nullptr, screen );
@@ -233,7 +270,8 @@ int wmain( int argument_count, wchar_t **arguments ) {
     test_background();
     test_desktops();
 
-    if ( argument_count > 1 ) save_picture( canvas, arguments[1] );
+    if ( argument_count > 2 && wstring( arguments[1] ) == L"--panel-picture" ) save_panel_picture( arguments[2] );
+    else if ( argument_count > 1 ) save_picture( canvas, arguments[1] );
 
     std::printf( "%s\n", check_failures() ? "Some checks failed." : "All checks passed." );
     return check_failures() ? 1 : 0;

@@ -159,7 +159,7 @@ Windows 11 Notepad has no way for another program to save or close a tab, which 
 | Option | What it does |
 |---|---|
 | `--background` | Starts with no window: a tray icon, the keyboard shortcut and a hidden window. Exits at once when a background Crammy is already running |
-| `--background --show` | The same, and shows the panel as soon as it has started |
+| `--background --show` | The same, and shows the panel as soon as it has started. When a background Crammy is already running, asks it to show the panel and exits |
 | `--panel` | Asks the running background Crammy to show or hide its panel, then exits. When none is running, starts one with `--background --show` and exits |
 
 `--panel` starts the new copy through `explorer.exe`, so that the copy is not tied to whatever ran `--panel`, such as a taskbar button.
@@ -170,9 +170,9 @@ Windows 11 Notepad has no way for another program to save or close a tab, which 
 
 **The shortcut.** It is registered with `RegisterHotKey` from the `shortcut` setting, and the default is Ctrl+Alt+C. The setting is read once, when the background copy starts, so a change needs a restart of it. If another program already owns the keys, registering fails without any message and the tray icon still works.
 
-**The tray icon.** A left click shows or hides the panel. A right click opens a menu with Setups, Edit timetable (opens `timetable.txt` in Notepad++), Start at sign-in (ticked when the Startup shortcut exists) and Quit. The icon is added again when Explorer restarts.
+**The tray icon.** A left click shows or hides the panel. A right click opens a menu with Setups, Edit timetable (opens `timetable.txt` in Notepad++), Start at sign-in (ticked when the Startup shortcut exists; choosing it flips `start at sign in` in `settings.txt` and makes or removes the shortcut) and Quit. The icon is added again when Explorer restarts.
 
-**Start at sign-in.** `set_start_at_sign_in` makes or removes `Crammy.lnk` in the user's Startup folder. The shortcut runs `crammy.exe --background` from the folder of the running program. The folder comes from `FOLDERID_Startup`, unless the environment variable `CRAMMY_STARTUP_FOLDER` is set; then that folder is used. The tests set it to a folder in `%TEMP%` so that they never touch the real Startup folder. Do not set it for any other reason.
+**Start at sign-in.** `set_start_at_sign_in` makes or removes `Crammy.lnk` in the user's Startup folder. The background Crammy calls it when it starts, so the shortcut matches the `start at sign in` setting. The shortcut runs `crammy.exe --background` from the folder of the running program. The folder comes from `FOLDERID_Startup`, unless the environment variable `CRAMMY_STARTUP_FOLDER` is set; then that folder is used. The tests set it to a folder in `%TEMP%` so that they never touch the real Startup folder. Do not set it for any other reason.
 
 **The panel.** It is a borderless window that opens above the bottom-left corner of the taskbar and closes when it loses focus or Esc is pressed. It shows the date and time, today's classes, a tile for every virtual desktop, and the buttons for the two Pomodoro videos and for Setups. `docs/panel-design.md` is the approved design, with the look it asks for. What the panel shows and what a click does are worked out in `panel_model.cpp`, without any window, so that they can be checked in tests. `panel.cpp` only draws that data and passes clicks to it.
 
