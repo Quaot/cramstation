@@ -352,8 +352,14 @@ void open_class( const today_row &row ) {
 
     wstring problem, target = click.desktop;
     if ( click.create_desktop ) {
+        size_t count_before = desktop_names().size();
         create_desktop( click.desktop, problem );
+        // The registry can lag behind the new desktop, so wait for it as switch_to_desktop does
         vector<wstring> fresh = desktop_names();
+        for ( int wait = 0; wait < 40 && fresh.size() <= count_before; ++wait ) {
+            Sleep( 50 );
+            fresh = desktop_names();
+        }
         if ( !problem.empty() && !fresh.empty() ) target = fresh.back();
     }
     wstring switch_problem = switch_to_desktop( target );
