@@ -162,7 +162,7 @@ Windows 11 Notepad has no way for another program to save or close a tab, which 
 | `--background --show` | The same, and shows the panel as soon as it has started. When a background Crammy is already running, asks it to show the panel and exits |
 | `--panel` | Asks the running background Crammy to show or hide its panel, then exits. When none is running, starts one with `--background --show` and exits |
 
-`--panel` starts the new copy through `explorer.exe`, so that the copy is not tied to whatever ran `--panel`, such as a taskbar button.
+`--panel` starts the new copy itself with `CreateProcessW` and `DETACHED_PROCESS`, from the folder of `crammy.exe`. The copy then keeps running when whatever ran `--panel` ends, such as a taskbar button. If the start fails, it is tried once more with `CREATE_BREAKAWAY_FROM_JOB` added. An earlier version started it through `explorer.exe`, which can drop the arguments.
 
 **The window and the message.** `run_background` in `background.cpp` makes a hidden top-level window of the class `CrammyBackground`. Anything that wants the panel finds that window and posts it the registered message `CrammyShowPanel` (`show_panel_message()`, from `RegisterWindowMessageW`). The window answers by calling `toggle_panel`. `--panel` and the Windhawk mod both work this way, (`--panel` through `ask_running_crammy_to_toggle_panel`). Keep the class name and the message name as they are: the mod has them written in.
 

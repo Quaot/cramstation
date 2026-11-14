@@ -107,12 +107,22 @@ int open_with_picks( const setup &chosen, const vector<wstring> &pick_texts, boo
     return problems.empty() ? 0 : 1;
 }
 
-// Started through explorer.exe so that it is not tied to whatever started this program.
+// Started detached, so that the new copy does not end with whatever ran --panel, such as a taskbar button.
 void start_background_with_panel() {
     wchar_t path[MAX_PATH * 4];
     DWORD length = GetModuleFileNameW( nullptr, path, MAX_PATH * 4 );
-    wstring command = L"explorer.exe " + quoted( wstring( path, length ) ) + L" --background --show";
-    start_process( command );
+    wstring exe( path, length ), folder = parent_folder( exe );
+    for ( DWORD flags : { DWORD( DETACHED_PROCESS ), DWORD( DETACHED_PROCESS | CREATE_BREAKAWAY_FROM_JOB ) } ) {
+        wstring command = quoted( exe ) + L" --background --show";
+        STARTUPINFOW startup{ sizeof( startup ) };
+        PROCESS_INFORMATION info{};
+        if ( CreateProcessW( exe.c_str(), command.data(), nullptr, nullptr, FALSE, flags, nullptr, folder.c_str(),
+                             &startup, &info ) ) {
+            CloseHandle( info.hThread );
+            CloseHandle( info.hProcess );
+            return;
+        }
+    }
 }
 
 }  // namespace
