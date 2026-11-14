@@ -66,3 +66,5 @@ A setup starts with every line of its profile, so lines shared by all setups can
 The build needs MSYS2 with the UCRT64 g++. Run `build.cmd`. PdfCraft is expected at `C:\Program Files\PdfCraft`.
 
 `tests\test.cmd` builds and runs the checks. They drop files on the picture in a hidden window, so nothing appears on screen.
+
+`docs/guide.md` explains how Crammy works and how to change it.
