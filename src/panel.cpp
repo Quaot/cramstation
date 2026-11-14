@@ -286,11 +286,13 @@ void read_panel_data() {
     calendar_date today{ now.wYear, now.wMonth, now.wDay };
     panel.today = build_today( classes_on( blocks, today ), minute_now, known_courses( blocks ), errors );
 
-    panel.names = desktop_names();
-    panel.tiles = build_tiles( panel.names, current_desktop_index(), windows_by_desktop() );
-
     vector<wstring> settings_errors;
     panel.settings = read_settings( read_text_file( settings_path() ), settings_errors );
+    // A timetable error comes first; a settings error takes the place of "No classes today".
+    if ( errors.empty() && !settings_errors.empty() ) panel.today.message = L"settings.txt: " + settings_errors[0];
+
+    panel.names = desktop_names();
+    panel.tiles = build_tiles( panel.names, current_desktop_index(), windows_by_desktop() );
 }
 
 int problem_height( int width ) {
