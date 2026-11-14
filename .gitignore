@@ -1,3 +1,4 @@
 cramstation.exe
 *.res
 last setup.txt
+tests/cramstation_test.exe

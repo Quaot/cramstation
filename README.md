@@ -1,12 +1,14 @@
 # Cramstation
 
-Cramstation opens the files for a study session and puts each window in its place. A typical setup puts notes in Notepad on the left half of the screen and a past exam in PdfCraft on the right. Setups are written in a plain text file, so changing what opens takes a few lines.
+Cramstation opens the files for a study session and puts each window in its place. A lecture setup can open this week's slides on the left and the summary sheet in Acrobat on the right, on that subject's own desktop.
 
 ## Use
 
-Run `cramstation.exe` and pick a setup from the list. If the setup lets you choose PDFs, tick the ones you want and press Open. Double-clicking a PDF opens it straight away. The last setup you opened is selected next time.
+Run `cramstation.exe`. Setups are listed on the left and the middle shows a picture of your screen. Press Open, or double-click a setup, to open it. The last setup you opened is selected next time.
 
-Edit profiles opens `profiles.txt` in a small editor. Saving checks the file and reports the first mistake with its line number.
+To build a setup, press New setup, then drag PDFs or folders from File Explorer onto the picture. Dropping on the left or right third fills that half of the screen; the middle fills the whole screen. Tiles can be dragged from one side to the other. Right-click a tile to open it in Acrobat, or to make it always open the newest file like it, which suits weekly slides. A folder becomes a list you tick from each time you open the setup. Every change is saved straight away.
+
+Edit as text opens `profiles.txt` in a small editor for anything the picture does not cover.
 
 It also runs from a terminal:
 
@@ -46,11 +48,12 @@ A side is `left` or `right`, or `full` for the whole screen. When several window
 | `notes` | Notepad with `<first PDF> - my answers (date).txt`, or the newest file of that name |
 | `notes "file.txt"` | Notepad with that file, made if missing |
 | `pdf "file.pdf"` | one PdfCraft window |
+| `newest "L*.pdf"` | the newest PDF whose name fits the pattern |
 | `tabs "a.pdf" "b.pdf"` | one PdfCraft window with a tab for each PDF |
 | `pick "folder" "file"` | the PDFs you tick at launch |
 | `folder "folder"` | File Explorer |
 
-Paths start from the root unless they are absolute. `*` matches any text in a file name, and variables such as `%USERPROFILE%` are expanded. Answer files go in `2 Practice` when the course has one. Set `notes folder = ...` to change that.
+Ending a PDF line with `with acrobat` opens it in Adobe Acrobat in place of PdfCraft. Paths start from the root unless they are absolute. `*` matches any text in a file name, and variables such as `%USERPROFILE%` are expanded. Answer files go in `2 Practice` when the course has one. Set `notes folder = ...` to change that.
 
 `desktop = 150` switches to the virtual desktop named 150 before anything opens, so each subject can keep its own desktop. Cramstation presses Ctrl+Win+Left or Right as many times as it takes and reads the desktop names from the registry.
 
@@ -59,3 +62,5 @@ A setup starts with every line of its profile, so lines shared by all setups can
 ## Build
 
 The build needs MSYS2 with the UCRT64 g++. Run `build.cmd`. PdfCraft is expected at `C:\Program Files\PdfCraft`.
+
+`tests\test.cmd` builds and runs the checks. They drop files on the picture in a hidden window, so nothing appears on screen.
