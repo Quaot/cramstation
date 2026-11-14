@@ -67,10 +67,15 @@ FrameworkElement::Loaded_revoker g_loaded_revoker;
 
 void show_panel() {
     static const UINT show_message = RegisterWindowMessageW( L"CrammyShowPanel" );
+    // Explorer has the last input, so it can let Crammy's panel take the focus.
     if ( HWND crammy_window = FindWindowW( L"CrammyBackground", nullptr ) ) {
+        DWORD crammy_process = 0;
+        GetWindowThreadProcessId( crammy_window, &crammy_process );
+        AllowSetForegroundWindow( crammy_process );
         PostMessageW( crammy_window, show_message, 0, 0 );
         return;
     }
+    AllowSetForegroundWindow( ASFW_ANY );
     size_t slash = g_crammy_path.find_last_of( L'\\' );
     std::wstring folder = slash == std::wstring::npos ? L"" : g_crammy_path.substr( 0, slash );
     ShellExecuteW( nullptr, L"open", g_crammy_path.c_str(), L"--panel",

@@ -180,7 +180,7 @@ Clicking a class goes to the desktop named after the course number (`desktop_nam
 
 The Pomodoro buttons start Youtonomous through `youtonomous_command`, with the long or the short video from the settings. Nothing else starts Youtonomous.
 
-**The Windhawk mod.** `windhawk\crammy-button.wh.cpp` hides the Widgets button on the taskbar and puts a Crammy button in its place. A click posts `CrammyShowPanel`, or runs `crammy.exe --panel` when the background window does not exist. It does nothing else, so that as little as possible runs inside Explorer. `windhawk\README.md` says how to add it and switch it off. The owner adds it himself.
+**The Windhawk mod.** `windhawk\crammy-button.wh.cpp` hides the Widgets button on the taskbar and puts a Crammy button in its place. A click posts `CrammyShowPanel`, or runs `crammy.exe --panel` when the background window does not exist. Before either, it calls `AllowSetForegroundWindow`, because Explorer had the click and Windows only lets that program hand the focus on. For the post, it names the process of the `CrammyBackground` window; for `--panel`, it uses `ASFW_ANY`. It does nothing else, so that as little as possible runs inside Explorer. `windhawk\README.md` says how to add it and switch it off. The owner adds it himself.
 
 ## Timetable
 
