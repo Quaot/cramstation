@@ -76,10 +76,6 @@ void shortcut_keys( UINT &modifiers, UINT &key ) {
     crammy_settings settings = current_settings();
     modifiers = settings.shortcut_modifiers;
     key = settings.shortcut_key;
-    if ( key == 0 ) {
-        modifiers = MOD_CONTROL | MOD_ALT;
-        key = 'C';
-    }
 }
 
 NOTIFYICONDATAW tray_data( HWND window ) {
@@ -105,9 +101,7 @@ void remove_tray_icon( HWND window ) {
 }
 
 void edit_timetable() {
-    wstring timetable = timetable_path();
-    if ( timetable.empty() ) timetable = join_path( parent_folder( program_path() ), L"timetable.txt" );
-    start_process( quoted( program_file( program::notepad_pp ) ) + L" " + quoted( timetable ) );
+    start_process( quoted( program_file( program::notepad_pp ) ) + L" " + quoted( timetable_path() ) );
 }
 
 void show_tray_menu( HWND window ) {
@@ -227,7 +221,7 @@ int run_background( bool show_panel_now ) {
     UINT modifiers, key;
     shortcut_keys( modifiers, key );
     // Another program may already own the shortcut; the tray icon still works without it.
-    if ( !RegisterHotKey( window, hotkey_id, modifiers | MOD_NOREPEAT, key ) ) {}
+    RegisterHotKey( window, hotkey_id, modifiers | MOD_NOREPEAT, key );
 
     if ( show_panel_now ) show_panel();
     run_message_loop();
