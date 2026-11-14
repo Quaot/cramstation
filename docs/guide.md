@@ -74,6 +74,7 @@ Problems at any step are collected as plain sentences and shown at the end; noth
 | `src/ui.cpp` | Fonts, DPI scaling, window creation, the message loop |
 | `src/text.cpp` | String, path and file helpers |
 | `tests/test_main.cpp` | The checks |
+| `windhawk/crammy-button.wh.cpp` | The Windhawk mod that puts the Crammy button on the taskbar; `windhawk/README.md` says how to add it |
 | `art/make_icon.py` | Draws `crammy.ico` with Pillow (`python art\make_icon.py`) |
 
 Answer keys are hidden from the tick list until its "Show answer keys" box is ticked. `is_answer_key` in `files.cpp` decides what counts as a key, with one case-insensitive pattern: the name contains "answer key", the word "solution" or "solutions", `-M-S (` or `-F-S`, or its stem ends in `-S` (the renamed course files, such as `ECE150-Mock-1112a-S.pdf`). `--pick` and `--list` do not use it.
