@@ -19,7 +19,7 @@ void register_window_class() {
 
 // Made off screen so it never appears on the owner's screen.
 HWND make_window( const wstring &title, bool shown ) {
-    HWND window = CreateWindowExW( WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW, window_class_name, title.c_str(),
+    HWND window = CreateWindowExW( WS_EX_APPWINDOW, window_class_name, title.c_str(),
                                    WS_OVERLAPPEDWINDOW, -32000, -32000, 200, 100,
                                    nullptr, nullptr, GetModuleHandleW( nullptr ), nullptr );
     if ( window && shown )
