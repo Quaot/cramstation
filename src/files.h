@@ -16,5 +16,5 @@ bool is_answer_key( const wstring &name );
 // "ECE190-W10-Slides.pdf" becomes "ECE190-W*-Slides.pdf", or "" when the name has no week or lecture number.
 wstring newest_pattern( const wstring &path );
 
-// The text file Notepad opens for a "notes" window.
+// The text file Notepad++ opens for a "notes" window.
 wstring notes_file( const setup &chosen, const layout_item &notes_item, const wstring &first_pdf );

@@ -17,7 +17,7 @@ vector<wstring> open_setup( const setup &chosen, const vector<vector<wstring>> &
         switch ( item.kind ) {
         case item_kind::notes:
             notes_windows.push_back( { plan.size(), &item } );
-            plan.push_back( { item.side, program::notepad, {} } );
+            plan.push_back( { item.side, program::notepad_pp, {} } );
             continue;
         case item_kind::folder:
             if ( is_folder( item.paths[0] ) ) plan.push_back( { item.side, program::explorer, item.paths } );
@@ -73,7 +73,7 @@ vector<wstring> open_setup( const setup &chosen, const vector<vector<wstring>> &
         notes_paths.push_back( plan[plan_index].paths[0] );
     }
 
-    // Save and close the notes tabs from earlier setups, so Notepad does not fill up with them
+    // Save and close the notes tabs from earlier setups, so Notepad++ does not fill up with them
     close_old_notes( notes_paths );
     for ( const wstring &path : notes_paths ) remember_notes( path );
 

@@ -27,7 +27,7 @@ const wchar_t *program_file( program app ) {
     switch ( app ) {
     case program::pdfcraft: return L"C:\\Program Files\\PdfCraft\\pdfcraft.exe";
     case program::acrobat: return L"C:\\Program Files\\Adobe\\Acrobat DC\\Acrobat\\Acrobat.exe";
-    case program::notepad: return L"C:\\Windows\\System32\\notepad.exe";
+    case program::notepad_pp: return L"C:\\Program Files\\Notepad++\\notepad++.exe";
     case program::explorer: return L"C:\\Windows\\explorer.exe";
     }
     return L"";
@@ -103,8 +103,8 @@ HWND find_window( const live_window &window, const std::set<HWND> &taken ) {
             DWORD process_id = 0;
             GetWindowThreadProcessId( hwnd, &process_id );
             if ( process_id == window.process_id ) return hwnd;
-        } else if ( window.plan.app == program::notepad || window.plan.app == program::acrobat ) {
-            const wchar_t *app_name = window.plan.app == program::notepad ? L"Notepad" : L"Adobe Acrobat";
+        } else if ( window.plan.app == program::notepad_pp || window.plan.app == program::acrobat ) {
+            const wchar_t *app_name = window.plan.app == program::notepad_pp ? L"Notepad++" : L"Adobe Acrobat";
             wstring title = title_of( hwnd );
             if ( contains_ci( title, file_name( window.plan.paths[0] ) ) && contains_ci( title, app_name ) ) return hwnd;
         } else if ( is_explorer( hwnd ) && contains_ci( title_of( hwnd ), file_name( window.plan.paths[0] ) ) ) {
@@ -206,8 +206,8 @@ vector<wstring> open_windows( const vector<planned_window> &plan ) {
             window.process_id = start_process( command );
         } else if ( window.plan.app == program::acrobat ) {
             start_process( quoted( acrobat_exe ) + L" /n " + quoted( window.plan.paths[0] ) );   // /n: a new window
-        } else if ( window.plan.app == program::notepad ) {
-            start_process( L"notepad.exe " + quoted( window.plan.paths[0] ) );
+        } else if ( window.plan.app == program::notepad_pp ) {
+            start_process( quoted( program_file( program::notepad_pp ) ) + L" " + quoted( window.plan.paths[0] ) );
         } else {
             start_process( L"explorer.exe " + quoted( window.plan.paths[0] ) );
         }
@@ -254,7 +254,7 @@ vector<wstring> open_windows( const vector<planned_window> &plan ) {
         if ( !window.hwnd ) problems.push_back( L"No window appeared for " + file_name( window.plan.paths[0] ) );
     }
     for ( const live_window &window : windows ) {
-        if ( window.hwnd && window.plan.app == program::notepad ) bring_to_front( window.hwnd );
+        if ( window.hwnd && window.plan.app == program::notepad_pp ) bring_to_front( window.hwnd );
     }
     return problems;
 }

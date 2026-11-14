@@ -12,6 +12,8 @@
 
 #include "../src/canvas.h"
 #include "../src/files.h"
+#include "../src/notes_tabs.h"
+#include "../src/tiling.h"
 #include "../src/ui.h"
 
 namespace {
@@ -116,6 +118,51 @@ void check_drops( HWND canvas ) {
     check( true, "dropping with no setup chosen does nothing" );
 }
 
+// A separate, minimized Notepad++ with three scratch files. Crammy remembers two of them
+// and keeps one, so exactly one tab should close; the third stands for a tab you opened yourself.
+void check_notes_tabs() {
+    wstring folder = join_path( expand_variables( L"%TEMP%" ), L"crammy notes check" );
+    CreateDirectoryW( folder.c_str(), nullptr );
+    wstring old_notes = join_path( folder, L"old notes.txt" ), kept_notes = join_path( folder, L"kept notes.txt" ),
+            own_file = join_path( folder, L"your own.txt" );
+    for ( const wstring &path : { old_notes, kept_notes, own_file } ) write_text_file( path, L"notes\r\n" );
+
+    wstring command = quoted( program_file( program::notepad_pp ) ) + L" -multiInst -nosession -noPlugin " +
+                      quoted( old_notes ) + L" " + quoted( kept_notes ) + L" " + quoted( own_file );
+    STARTUPINFOW startup{ sizeof( startup ) };
+    startup.dwFlags = STARTF_USESHOWWINDOW;
+    startup.wShowWindow = SW_SHOWMINNOACTIVE;
+    PROCESS_INFORMATION info{};
+    if ( !CreateProcessW( nullptr, command.data(), nullptr, nullptr, FALSE, 0, nullptr, nullptr, &startup, &info ) ) {
+        check( false, "Notepad++ starts for the notes check" );
+        return;
+    }
+    WaitForInputIdle( info.hProcess, 5000 );
+    HWND window = nullptr;
+    for ( int wait = 0; wait < 50 && !window; ++wait ) {
+        Sleep( 100 );
+        for ( HWND each : top_windows() ) {
+            DWORD process_id = 0;
+            GetWindowThreadProcessId( each, &process_id );
+            wchar_t class_name[32];
+            GetClassNameW( each, class_name, 32 );
+            if ( process_id == info.dwProcessId && wstring( class_name ) == L"Notepad++" ) window = each;
+        }
+    }
+    auto tab_count = [&] { return int( SendMessageW( window, WM_USER + 1000 + 7, 0, 1 ) ); };
+    check( window && tab_count() == 3, "the scratch Notepad++ opens three tabs" );
+
+    remember_notes( old_notes );
+    remember_notes( kept_notes );
+    close_old_notes( { kept_notes }, window );
+    check( tab_count() == 2, "only the old notes tab closes" );
+
+    PostMessageW( window, WM_CLOSE, 0, 0 );
+    if ( WaitForSingleObject( info.hProcess, 5000 ) != WAIT_OBJECT_0 ) TerminateProcess( info.hProcess, 0 );
+    CloseHandle( info.hThread );
+    CloseHandle( info.hProcess );
+}
+
 // Saves what the canvas looks like for a sample setup, without showing it on screen
 void save_picture( HWND canvas, const wchar_t *path ) {
     static vector<written_item> items = {
@@ -161,6 +208,7 @@ int wmain( int argument_count, wchar_t **arguments ) {
     check_profiles_round_trip();
     check_newest_pattern();
     check_drops( canvas );
+    check_notes_tabs();
     if ( argument_count > 1 ) save_picture( canvas, arguments[1] );
 
     std::printf( "%s\n", failures ? "Some checks failed." : "All checks passed." );

@@ -10,8 +10,8 @@
 # Windows are written as  side = what
 #   side is left or right, or full for the whole screen. Windows on one side stack top to bottom.
 #
-#   notes                       Notepad with "<first PDF> - my answers (date).txt"
-#   notes "file.txt"            Notepad with that file, made if missing
+#   notes                       Notepad++ with "<first PDF> - my answers (date).txt"
+#   notes "file.txt"            Notepad++ with that file, made if missing
 #   pdf "file.pdf"              one PDF
 #   newest "Lec*.pdf"           the newest PDF whose name fits; * matches any text
 #   tabs "a.pdf" "b.pdf"        one PdfCraft window, one tab per PDF

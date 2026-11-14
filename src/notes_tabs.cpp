@@ -2,12 +2,20 @@
 
 #include <windows.h>
 
-#include <functional>
-
 #include "profiles.h"
 #include "tiling.h"
 
 namespace {
+
+// Commands Notepad++ accepts from other programs (from its Notepad_plus_msgs.h).
+// They work on its window directly: nothing comes to the front and no keys are pressed.
+const UINT npp_message = WM_USER + 1000;
+const UINT npp_open_file_count = npp_message + 7;
+const UINT npp_switch_to_tab = npp_message + 28;
+const UINT npp_save_tab = npp_message + 38;
+const UINT npp_menu_command = npp_message + 48;
+const LPARAM npp_close_tab = 41003;
+const WPARAM main_view = 0, second_view = 1;
 
 wstring list_path() {
     return join_path( parent_folder( profiles_path() ), L"notes opened.txt" );
@@ -38,38 +46,18 @@ bool listed( const vector<wstring> &paths, const wstring &path ) {
     return false;
 }
 
-HWND notepad_showing( const wstring &name ) {
-    for ( HWND hwnd : top_windows() ) {
-        wstring title = title_of( hwnd );
-        if ( contains_ci( title, L"Notepad" ) && ( name.empty() || contains_ci( title, name ) ) ) return hwnd;
-    }
-    return nullptr;
+// Notepad++ titles itself "*C:\folder\file.txt - Notepad++", with * while there are unsaved changes
+wstring shown_file( HWND window ) {
+    wstring title = title_of( window );
+    if ( starts_with( title, L"*" ) ) title.erase( 0, 1 );
+    size_t end = title.rfind( L" - Notepad++" );
+    return end == wstring::npos ? title : title.substr( 0, end );
 }
 
-bool wait_for( const std::function<bool()> &done, int milliseconds ) {
-    for ( int waited = 0; waited < milliseconds; waited += 100 ) {
-        if ( done() ) return true;
-        Sleep( 100 );
-    }
-    return done();
-}
-
-// Each step checks the window before the next key press, so a surprise leaves the tab open.
-bool save_and_close( const wstring &path ) {
-    wstring name = file_name( path );
-    start_process( L"notepad.exe " + quoted( path ) );   // brings that file's tab to the front
-
-    HWND hwnd = nullptr;
-    if ( !wait_for( [&] { return ( hwnd = notepad_showing( name ) ) != nullptr; }, 3000 ) ) return false;
-    if ( !bring_to_front( hwnd ) ) return false;
-
-    press_keys( { VK_CONTROL, 'S' } );
-    // Notepad starts the title with * while the file has unsaved changes
-    if ( !wait_for( [&] { return !starts_with( title_of( hwnd ), L"*" ); }, 2000 ) ) return false;
-    if ( GetForegroundWindow() != hwnd || !contains_ci( title_of( hwnd ), name ) ) return false;
-
-    press_keys( { VK_CONTROL, 'W' } );
-    return wait_for( [&] { return !IsWindow( hwnd ) || !contains_ci( title_of( hwnd ), name ); }, 2000 );
+bool is_file_shown( HWND window, const wstring &path ) {
+    wstring shown = shown_file( window );
+    if ( shown.find( L'\\' ) == wstring::npos ) return lower( shown ) == lower( file_name( path ) );
+    return lower( shown ) == lower( path );
 }
 
 }  // namespace
@@ -81,17 +69,41 @@ void remember_notes( const wstring &path ) {
     write_list( paths );
 }
 
-void close_old_notes( const vector<wstring> &keep ) {
+void close_old_notes( const vector<wstring> &keep, HWND window ) {
     vector<wstring> paths = read_list();
-    if ( paths.empty() ) return;
-    if ( !notepad_showing( L"" ) ) {   // Notepad is closed, so no tabs are left to close
-        write_list( {} );
+    if ( !window ) window = FindWindowW( L"Notepad++", nullptr );
+    if ( paths.empty() || !window ) {   // with Notepad++ closed, no tabs are left to close
+        if ( !window ) write_list( {} );
         return;
     }
+
+    wstring was_showing = shown_file( window );
     vector<wstring> still_open;
-    for ( const wstring &path : paths ) {
-        if ( listed( keep, path ) ) still_open.push_back( path );
-        else if ( is_file( path ) && !save_and_close( path ) ) still_open.push_back( path );
+    for ( WPARAM view : { main_view, second_view } ) {
+        int count = int( SendMessageW( window, npp_open_file_count, 0, view == main_view ? 1 : 2 ) );
+        // Going from the last tab back means closing one does not move the ones still to check
+        for ( int tab = count - 1; tab >= 0; --tab ) {
+            SendMessageW( window, npp_switch_to_tab, view, tab );
+            wstring path = shown_file( window );
+            if ( !listed( paths, path ) || listed( keep, path ) ) continue;
+
+            SendMessageW( window, npp_save_tab, 0, 0 );
+            if ( starts_with( title_of( window ), L"*" ) || !is_file_shown( window, path ) ) {
+                still_open.push_back( path );   // it did not save, so the tab stays
+                continue;
+            }
+            SendMessageW( window, npp_menu_command, 0, npp_close_tab );
+        }
     }
+
     write_list( still_open );
+
+    // Put back the tab that was showing before, if it is still open
+    for ( WPARAM view : { main_view, second_view } ) {
+        int count = int( SendMessageW( window, npp_open_file_count, 0, view == main_view ? 1 : 2 ) );
+        for ( int tab = 0; tab < count; ++tab ) {
+            SendMessageW( window, npp_switch_to_tab, view, tab );
+            if ( lower( shown_file( window ) ) == lower( was_showing ) ) return;
+        }
+    }
 }

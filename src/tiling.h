@@ -2,7 +2,7 @@
 
 #include "text.h"
 
-enum class program { pdfcraft, acrobat, notepad, explorer };
+enum class program { pdfcraft, acrobat, notepad_pp, explorer };
 
 // Where each program's .exe is, for starting it and for its icon
 const wchar_t *program_file( program app );
@@ -10,7 +10,7 @@ const wchar_t *program_file( program app );
 struct planned_window {
     wstring side;           // left, right or full
     program app;
-    vector<wstring> paths;  // PDFs for PdfCraft, one file for Notepad, one folder for Explorer
+    vector<wstring> paths;  // PDFs for PdfCraft, one file for Notepad++, one folder for Explorer
 };
 
 #include <initializer_list>

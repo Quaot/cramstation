@@ -10,6 +10,8 @@ To build a setup, press New setup, then drag PDFs or folders from File Explorer 
 
 Edit as text opens `profiles.txt` in a small editor for anything the picture does not cover.
 
+Notes open in Notepad++. Each time a setup opens, Crammy saves and closes the notes tabs it opened before, using commands Notepad++ accepts from other programs, so nothing comes to the front and no keys are pressed. Tabs you opened yourself stay open.
+
 It also runs from a terminal:
 
 ```
@@ -45,8 +47,8 @@ A side is `left` or `right`, or `full` for the whole screen. When several window
 
 | Line | Opens |
 |---|---|
-| `notes` | Notepad with `<first PDF> - my answers (date).txt`, or the newest file of that name |
-| `notes "file.txt"` | Notepad with that file, made if missing |
+| `notes` | Notepad++ with `<first PDF> - my answers (date).txt`, or the newest file of that name |
+| `notes "file.txt"` | Notepad++ with that file, made if missing |
 | `pdf "file.pdf"` | one PdfCraft window |
 | `newest "L*.pdf"` | the newest PDF whose name fits the pattern |
 | `tabs "a.pdf" "b.pdf"` | one PdfCraft window with a tab for each PDF |

@@ -107,7 +107,7 @@ void describe( tile &each, const written_item &item ) {
     size_t count = item.paths.size();
     switch ( item.kind ) {
     case item_kind::notes:
-        each.app = program::notepad;
+        each.app = program::notepad_pp;
         each.opens = count ? file_name( item.paths[0] ) : L"Answer notes";
         if ( !count ) each.caption = L"Named after the first PDF";
         break;
@@ -175,7 +175,7 @@ void set_hover( zone place ) {
 // Painting
 // ---------------------------------------------------------------------------
 
-const wchar_t *program_names[] = { L"PdfCraft", L"Adobe Acrobat", L"Notepad", L"File Explorer" };
+const wchar_t *program_names[] = { L"PdfCraft", L"Adobe Acrobat", L"Notepad++", L"File Explorer" };
 
 HICON program_icon( program app, int size ) {
     static std::map<std::pair<int, int>, HICON> icons;
@@ -565,5 +565,5 @@ void add_notes_tile() {
     wstring side = has_side( L"left" ) && !has_side( L"right" ) ? L"right" : side_for( zone_left );
     canvas.items->push_back( { side, item_kind::notes, {} } );
     changed();
-    hint( L"Notes open in Notepad, in a file named after the first PDF of the setup." );
+    hint( L"Notes open in Notepad++, in a file named after the first PDF of the setup." );
 }
